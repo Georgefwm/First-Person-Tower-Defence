@@ -16,6 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	ABuilding();
 
+	// Adjust the targeting function based on target priority
 	enum TargetPriority : uint8
 	{
 		TP_DIST_LOWEST,
@@ -53,6 +54,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	AEnemy* CurrentTarget = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
+	uint8 CurrentTargetPriority = TP_DIST_LOWEST;
 
 	UFUNCTION()
 	virtual FVector GetSearchPosition();
