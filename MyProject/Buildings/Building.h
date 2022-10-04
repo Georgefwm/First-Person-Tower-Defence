@@ -15,6 +15,14 @@ class MYPROJECT_API ABuilding : public AActor
 public:
 	// Sets default values for this actor's properties
 	ABuilding();
+
+	enum TargetPriority : uint8
+	{
+		TP_DIST_LOWEST,
+		TP_DIST_HIGHEST,
+		TP_HP_LOWEST,
+		TP_HP_HIGHEST,
+	};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int MaxHealthPoints = 1000;
