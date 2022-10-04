@@ -12,35 +12,49 @@ ABuildTool::ABuildTool()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// static ConstructorHelpers::FClassFinder<UUserWidget> PlayerPawnClassFinder(TEXT("/Game/Player/BuildTool/BuildMenuWidget"));
-	// BuildToolMenuClass = PlayerPawnClassFinder.Class;
+	static ConstructorHelpers::FClassFinder<UUserWidget> PlayerPawnClassFinder(TEXT("/Game/Player/BuildTool/BuildMenuWidget"));
+	BuildToolMenuClass = PlayerPawnClassFinder.Class;
 	
 	if (BuildToolMenuClass)
 		BuildToolMenuWidget = Cast<UUserWidget>(CreateWidget(GetWorld(), BuildToolMenuClass));
-
+	
 	if (BuildToolMenuWidget != nullptr)
 	{
-		//FVector2d MenuSize = { 200, 200 };
-		//BuildToolMenuWidget->SetDesiredSizeInViewport(MenuSize);
+		FVector2d MenuSize = { 200, 200 };
+		BuildToolMenuWidget->SetDesiredSizeInViewport(MenuSize);
 		MenuOpen = false;
 	}
-	
 }
 
 void ABuildTool::OpenBuildMenu()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Trying to open menu"));
+	// Get cleared occasionally
+	if (BuildToolMenuWidget != nullptr)
+		BuildToolMenuWidget = Cast<UUserWidget>(CreateWidget(GetWorld(), BuildToolMenuClass));
 	
-	BuildToolMenuWidget->AddToViewport();
-	MenuOpen = true;
+	if (BuildToolMenuWidget != nullptr)
+	{
+		BuildToolMenuWidget->AddToViewport();
+		MenuOpen = true;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Widget is a nullptr"));
+	}
+	
 }
 
 void ABuildTool::CloseBuildMenu()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Trying to close menu"));
-	
-	BuildToolMenuWidget->RemoveFromViewport();
-	MenuOpen = false;
+	if (BuildToolMenuWidget != nullptr)
+	{
+		BuildToolMenuWidget->RemoveFromViewport();
+		MenuOpen = false;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Widget is a nullptr"));
+	}
 }
 
 // Called when the game starts or when spawned

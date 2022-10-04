@@ -17,7 +17,7 @@ public:
 
 
 	// For the build tool menu
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD Elements")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "HUD Elements")
 	TSubclassOf<UUserWidget> BuildToolMenuClass;
 
 	UPROPERTY()
