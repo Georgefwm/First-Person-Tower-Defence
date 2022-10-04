@@ -55,19 +55,17 @@ bool ABuilding::HasLineOfSight()
 	TraceParams.AddIgnoredActor(this);
 	TraceParams.bFindInitialOverlaps = true;
 	
-	bool Hit = GetWorld()->LineTraceSingleByChannel(HitRes, To, From, ECC_Visibility, TraceParams);
-	DrawDebugLine(GetWorld(), From, To, FColor(255, 0, 0));
+	bool Hit = GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams);
 
 	if (Hit)
 	{
-		DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0));
-		DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald);
-		DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0));
-		
-		// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
-		return true;
+		// DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0));
+		// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald);
+		// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0));
+
+		return HitRes.GetActor()->GetName().Equals(CurrentTarget->GetName());
 	}
-	return true;
+	return false;
 }
 
 void ABuilding::CheckForNewTarget()

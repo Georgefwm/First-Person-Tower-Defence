@@ -85,7 +85,6 @@ void ABasicBuilding::CheckForNewTarget()
 	{
 		NextTarget = this->CurrentTarget;
 		ShortestDistance = FVector::Dist(this->GetActorLocation(), this->CurrentTarget->GetActorLocation());
-		// DrawDebugLine(GetWorld(), this->GetSearchPosition(), CurrentTarget->GetActorLocation(), FColor(2, 2, 2));
 	}
 	
 	TArray<AActor*> Actors;
