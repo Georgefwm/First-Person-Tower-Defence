@@ -47,6 +47,9 @@ public:
 	// UFUNCTION(BlueprintCallable, Category="Backend")
 	// void AttachToComponent(USkeletalMeshComponent* TargetMesh);
 
+	UPROPERTY(VisibleAnywhere)
+	bool IsActiveWeapon;
+
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")
 	virtual void PrimaryFire();

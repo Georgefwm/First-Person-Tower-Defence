@@ -4,6 +4,8 @@
 #include "BuildTool.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 
 
 // Sets default values
@@ -27,6 +29,8 @@ ABuildTool::ABuildTool()
 
 	static ConstructorHelpers::FClassFinder<ABuilding> BuildingClassFinder(TEXT("/Game/Buildings/BasicBuilding/BasicBuildingBP"));
 	Buildings.Add(BuildingClassFinder.Class);
+
+	SelectedBuildingIndex = 0;
 }
 
 void ABuildTool::OpenBuildMenu()
@@ -88,11 +92,54 @@ void ABuildTool::BeginPlay()
 void ABuildTool::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 }
 
 void ABuildTool::PrimaryFire()
 {
 	Super::PrimaryFire();
+
+	if (!MenuOpen && this->IsActiveWeapon)
+	{
+		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetAttachParentActor());
+		if (OwningPlayer == nullptr)
+			return;
+
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Looking for building placement"));
+
+		FMinimalViewInfo CameraView;
+		OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+		
+		FVector Location = CameraView.Location + CameraView.Rotation.Vector() * 400;
+		FVector Down = { 0.0, 0.0, -1.0 };
+
+		FVector From = Location;
+		FVector To = Location + Down * 600;
+
+		FHitResult HitRes;
+		
+
+		FCollisionQueryParams TraceParams;
+		TraceParams.AddIgnoredActor(this);
+		
+		if (GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams))
+		{
+			DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), true, -1);
+			DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
+			DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
+
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
+
+			Location = HitRes.ImpactPoint;
+			FRotator Rotation = GetActorForwardVector().ToOrientationRotator();
+			
+			FActorSpawnParameters SpawnInfo;
+			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			
+			
+			GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation, SpawnInfo);
+		}
+	}
 }
 
 void ABuildTool::SecondaryFire()
@@ -127,7 +174,7 @@ void ABuildTool::SetSelectedBuilding(int Index)
 {
 	if (IsValid(Buildings[Index]))
 	{
-		SelectedBuildingType = Buildings[Index];
+		SelectedBuildingIndex = Index;
 	}
 }
 

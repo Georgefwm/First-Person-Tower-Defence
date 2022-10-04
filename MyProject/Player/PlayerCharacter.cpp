@@ -169,6 +169,7 @@ void APlayerCharacter::SetupWeapons()
 	{
 		EquippedWeapon->SetActorHiddenInGame(false);
 		EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+		EquippedWeapon->IsActiveWeapon = true;
 		
 		Weapons.Add(EquippedWeapon);
 	}
@@ -177,6 +178,7 @@ void APlayerCharacter::SetupWeapons()
 	{
 		Weapon->SetActorHiddenInGame(true);
 		Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+		Weapon->IsActiveWeapon = false;
 		
 		Weapons.Add(Weapon);
 	}
@@ -186,6 +188,9 @@ void APlayerCharacter::SetupWeapons()
 		Weapons.Add(Weapon);
 		Weapon->SetActorHiddenInGame(true);
 		Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+		Weapon->IsActiveWeapon = false;
+
+		Weapons.Add(EquippedWeapon);
 	}
 	
 }

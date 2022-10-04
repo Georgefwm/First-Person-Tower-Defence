@@ -40,11 +40,13 @@ void AWeapon::Reload()
 void AWeapon::OnEquip()
 {
 	this->SetActorHiddenInGame(false);
+	this->IsActiveWeapon = true;
 }
 
 void AWeapon::OnUnEquip()
 {
 	this->SetActorHiddenInGame(true);
+	this->IsActiveWeapon = false;
 }
 
 // FHitResult AWeapon::DoLineTrace()

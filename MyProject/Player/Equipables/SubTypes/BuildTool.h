@@ -24,11 +24,11 @@ public:
 	UPROPERTY()
 	UUserWidget* BuildToolMenuWidget;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	TArray<TSubclassOf<ABuilding>> Buildings;
 
-	UPROPERTY()
-	TSubclassOf<ABuilding> SelectedBuildingType;
+	UPROPERTY(VisibleAnywhere)
+	int SelectedBuildingIndex;
 
 	UPROPERTY()
 	bool MenuOpen = false;

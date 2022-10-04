@@ -95,6 +95,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
 
+	UFUNCTION(BlueprintCallable)
+	AWeapon* GetBuildTool() { return Weapons[2]; }
+
 //////////////////////////////////////////////////////////////////
 
 
