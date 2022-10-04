@@ -73,7 +73,7 @@ protected:
 
 	bool HasLineOfSight();
 
-	void CheckForNewTarget();
+	virtual void CheckForNewTarget();
 
 public:
 	// Called every frame

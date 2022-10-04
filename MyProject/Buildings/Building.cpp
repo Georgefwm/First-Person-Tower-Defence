@@ -39,28 +39,7 @@ void ABuilding::Build(float DeltaTime)
 
 void ABuilding::Attack(float DeltaTime)
 {
-	CheckForNewTarget();
-
-	// Attack target if we can and there is one
-	if (this->AttackCooldown <= 0 && this->CurrentTarget)
-	{
-		
-
-		// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, HitRes.GetActor()->GetName());
-		
-		// Only deal damage if there is nothing in the way
-		if (this->HasLineOfSight())
-		{
-			this->CurrentTarget->ApplyDamage(this->AttackDamage);
-			this->AttackCooldown = this->AttackSpeed;
-		}
-	}
-	else
-	{
-		// stop bes things happening if tower doesnt attack for a looooong time
-		if (this->AttackCooldown <= 0) AttackCooldown = -1;
-		else this->AttackCooldown -= DeltaTime;
-	}
+	
 }
 
 bool ABuilding::HasLineOfSight()
@@ -72,11 +51,11 @@ bool ABuilding::HasLineOfSight()
 
 	FHitResult HitRes;
 
-	FCollisionQueryParams TraceParms;
-	TraceParms.AddIgnoredActor(this);
-	TraceParms.bFindInitialOverlaps = true;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+	TraceParams.bFindInitialOverlaps = true;
 	
-	bool Hit = GetWorld()->LineTraceSingleByChannel(HitRes, To, From, ECC_Visibility, TraceParms);
+	bool Hit = GetWorld()->LineTraceSingleByChannel(HitRes, To, From, ECC_Visibility, TraceParams);
 	DrawDebugLine(GetWorld(), From, To, FColor(255, 0, 0));
 
 	if (Hit)
@@ -93,32 +72,7 @@ bool ABuilding::HasLineOfSight()
 
 void ABuilding::CheckForNewTarget()
 {
-	AEnemy* NextTarget = nullptr;
-	float ShortestDistance = static_cast<float>(this->AttackRange);
 	
-	if (IsValid(this->CurrentTarget))
-	{
-		NextTarget = this->CurrentTarget;
-		ShortestDistance = FVector::Dist(this->GetActorLocation(), this->CurrentTarget->GetActorLocation());
-		// DrawDebugLine(GetWorld(), this->GetSearchPosition(), CurrentTarget->GetActorLocation(), FColor(2, 2, 2));
-	}
-	
-	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Actors);
-	// Always try to attack the closet enemy
-	for (AActor* e : Actors)
-	{
-		AEnemy* Enemy = Cast<AEnemy>(e);
-		if (Enemy)
-		{
-			if (FVector::Dist(this->GetActorLocation() + this->GetActorUpVector() * 200, Enemy->GetActorLocation()) < ShortestDistance)
-			{
-				NextTarget = Enemy;
-			}
-		}
-	}
-
-	this->CurrentTarget = NextTarget;
 }
 
 // Called every frame

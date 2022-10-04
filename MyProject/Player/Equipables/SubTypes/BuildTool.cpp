@@ -24,6 +24,9 @@ ABuildTool::ABuildTool()
 		BuildToolMenuWidget->SetDesiredSizeInViewport(MenuSize);
 		MenuOpen = false;
 	}
+
+	static ConstructorHelpers::FClassFinder<ABuilding> BuildingClassFinder(TEXT("/Game/Buildings/BasicBuilding/BasicBuildingBP"));
+	Buildings.Add(BuildingClassFinder.Class);
 }
 
 void ABuildTool::OpenBuildMenu()
@@ -34,8 +37,17 @@ void ABuildTool::OpenBuildMenu()
 	
 	if (BuildToolMenuWidget != nullptr)
 	{
-		BuildToolMenuWidget->AddToViewport();
-		MenuOpen = true;
+		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetAttachParentActor());
+		if (OwningPlayer != nullptr)
+		{
+			OwningPlayer->GetLocalViewingPlayerController()->bShowMouseCursor = true;
+			OwningPlayer->GetLocalViewingPlayerController()->bEnableClickEvents = true;
+			OwningPlayer->GetLocalViewingPlayerController()->ClientIgnoreLookInput(true);
+			
+			BuildToolMenuWidget->AddToViewport();
+			MenuOpen = true;
+		}
+		
 	}
 	else
 	{
@@ -48,8 +60,16 @@ void ABuildTool::CloseBuildMenu()
 {
 	if (BuildToolMenuWidget != nullptr)
 	{
-		BuildToolMenuWidget->RemoveFromViewport();
-		MenuOpen = false;
+		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetAttachParentActor());
+		if (OwningPlayer != nullptr)
+		{
+			OwningPlayer->GetLocalViewingPlayerController()->bShowMouseCursor = false;
+			OwningPlayer->GetLocalViewingPlayerController()->bEnableClickEvents = false;
+			OwningPlayer->GetLocalViewingPlayerController()->ClientIgnoreLookInput(false);
+			
+			BuildToolMenuWidget->RemoveFromViewport();
+			MenuOpen = false;
+		}
 	}
 	else
 	{
@@ -101,5 +121,13 @@ void ABuildTool::OnUnEquip()
 	
 	if (MenuOpen)
 		CloseBuildMenu();
+}
+
+void ABuildTool::SetSelectedBuilding(int Index)
+{
+	if (IsValid(Buildings[Index]))
+	{
+		SelectedBuildingType = Buildings[Index];
+	}
 }
 

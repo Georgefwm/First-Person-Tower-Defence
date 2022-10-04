@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MyProject/Buildings/Building.h"
 #include "MyProject/Player/Equipables/Weapon.h"
 #include "BuildTool.generated.h"
 
@@ -22,6 +23,12 @@ public:
 
 	UPROPERTY()
 	UUserWidget* BuildToolMenuWidget;
+
+	UPROPERTY()
+	TArray<TSubclassOf<ABuilding>> Buildings;
+
+	UPROPERTY()
+	TSubclassOf<ABuilding> SelectedBuildingType;
 
 	UPROPERTY()
 	bool MenuOpen = false;
@@ -52,4 +59,7 @@ public:
 	virtual void OnEquip() override;
 	
 	virtual void OnUnEquip() override;
+
+	UFUNCTION(BlueprintCallable)
+	void SetSelectedBuilding(int Index);
 };
