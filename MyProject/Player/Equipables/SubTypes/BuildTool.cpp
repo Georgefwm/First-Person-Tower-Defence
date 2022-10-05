@@ -2,6 +2,8 @@
 
 
 #include "BuildTool.h"
+
+#include "VectorUtil.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraActor.h"
@@ -109,16 +111,19 @@ void ABuildTool::PrimaryFire()
 
 		FMinimalViewInfo CameraView;
 		OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+
+		// Clamp Y axis rotation so the player can't spawn buildings directly above/below them
+		UE::Math::TVector<double> ClampedCameraRotation = CameraView.Rotation.Vector();
+		ClampedCameraRotation.Y = UE::Geometry::VectorUtil::Clamp(ClampedCameraRotation.Y, -40.0, 40.0);
 		
-		FVector Location = CameraView.Location + CameraView.Rotation.Vector() * 400;
+		FVector Location = CameraView.Location + ClampedCameraRotation * 200;
 		FVector Down = { 0.0, 0.0, -1.0 };
 
 		FVector From = Location;
-		FVector To = Location + Down * 600;
+		FVector To = Location + Down * 200;
 
 		FHitResult HitRes;
 		
-
 		FCollisionQueryParams TraceParams;
 		TraceParams.AddIgnoredActor(this);
 		
@@ -131,11 +136,14 @@ void ABuildTool::PrimaryFire()
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
 
 			Location = HitRes.ImpactPoint;
-			FRotator Rotation = GetActorForwardVector().ToOrientationRotator();
+
+			// We only want the building to face the direction the player is facing (for now)
+			double DesiredYaw = GetActorForwardVector().ToOrientationRotator().Yaw;
+			FRotator Rotation = { 0, DesiredYaw, 0 };
 			
 			FActorSpawnParameters SpawnInfo;
-			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			
+			// No janky spawning locations please :)
+			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 			
 			GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation, SpawnInfo);
 		}
