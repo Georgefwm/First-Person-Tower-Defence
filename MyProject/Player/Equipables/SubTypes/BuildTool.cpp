@@ -8,6 +8,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Materials/MaterialExpressionChannelMaskParameter.h"
 
 
 // Sets default values
@@ -111,16 +114,28 @@ void ABuildTool::PrimaryFire()
 
 		FMinimalViewInfo CameraView;
 		OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
-
+		
 		// Clamp Y axis rotation so the player can't spawn buildings directly above/below them
 		UE::Math::TVector<double> ClampedCameraRotation = CameraView.Rotation.Vector();
-		ClampedCameraRotation.Y = UE::Geometry::VectorUtil::Clamp(ClampedCameraRotation.Y, -40.0, 40.0);
+		ClampedCameraRotation.Z = UE::Geometry::VectorUtil::Clamp(ClampedCameraRotation.Z, -0.5, 0.5);
 		
-		FVector Location = CameraView.Location + ClampedCameraRotation * 200;
+		FVector CameraViewFlatForwardVector = CameraView.Location + ClampedCameraRotation;
+
+		double ForwardBuildDistance = 200;
+
+		// EW. Maths
+		// Calculate the distance that the building should spawn regardless of the camera pitch
+		double PitchInRadians = UKismetMathLibrary::DegreesToRadians(CameraView.Rotation.Pitch);
+		double ClampedPitchInRadians = UE::Geometry::VectorUtil::Clamp(PitchInRadians, -45.0, 45.0);
+		float DesiredDistance = ForwardBuildDistance / UKismetMathLibrary::Cos(ClampedPitchInRadians);
+
+		FVector Location = CameraView.Location + ClampedCameraRotation * DesiredDistance;
 		FVector Down = { 0.0, 0.0, -1.0 };
 
 		FVector From = Location;
-		FVector To = Location + Down * 200;
+		FVector To = Location + Down * 250;
+
+		DrawDebugLine(GetWorld(), CameraViewFlatForwardVector, From, FColor(255, 0, 0), true, -1);
 
 		FHitResult HitRes;
 		
@@ -129,14 +144,14 @@ void ABuildTool::PrimaryFire()
 		
 		if (GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams))
 		{
-			DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), true, -1);
-			DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
-			DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
-
+			// DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), true, -1);
+			// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
+			// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
+		
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
-
+		
 			Location = HitRes.ImpactPoint;
-
+		
 			// We only want the building to face the direction the player is facing (for now)
 			double DesiredYaw = GetActorForwardVector().ToOrientationRotator().Yaw;
 			FRotator Rotation = { 0, DesiredYaw, 0 };
@@ -147,6 +162,7 @@ void ABuildTool::PrimaryFire()
 			
 			GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation, SpawnInfo);
 		}
+
 	}
 }
 
