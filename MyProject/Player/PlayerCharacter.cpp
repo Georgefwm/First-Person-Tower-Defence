@@ -245,6 +245,8 @@ void APlayerCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const FVect
 	TouchItem.bIsPressed = false;
 }
 
+//////////////////////////////////////////////////////////////////////////// Movement
+
 void APlayerCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
@@ -286,18 +288,5 @@ void APlayerCharacter::LineTrace(FHitResult& HitRes, double Distance)
 	FVector To = From + (Rotation.Vector() * Distance);
 
 	FCollisionQueryParams TraceParms;
-	GetWorld()->LineTraceSingleByChannel(HitRes, To, From, ECC_Visibility, TraceParms);
-}
-
-bool APlayerCharacter::EnableTouchscreenMovement(class UInputComponent* PlayerInputComponent)
-{
-	if (FPlatformMisc::SupportsTouchInput() || GetDefault<UInputSettings>()->bUseMouseForTouch)
-	{
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Pressed, this, &APlayerCharacter::BeginTouch);
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Released, this, &APlayerCharacter::EndTouch);
-
-		return true;
-	}
-	
-	return false;
+	GetWorld()->LineTraceSingleByChannel(HitRes, From, to, ECC_Visibility, TraceParms);
 }

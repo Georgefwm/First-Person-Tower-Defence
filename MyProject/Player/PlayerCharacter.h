@@ -24,13 +24,9 @@ class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(EditDefaultsOnly, Category=Mesh)
-	USkeletalMeshComponent* Mesh1P;
+	
 
-	/** First person camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FirstPersonCameraComponent;
+	
 
 public:
 	APlayerCharacter();
@@ -47,7 +43,27 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnUseItem;
 	
-public:
+//////////////////////////////////////////////////////////////////
+/// First person 
+
+	/** Pawn mesh: 1st person view (arms; seen only by self) */
+	UPROPERTY(EditDefaultsOnly, Category=Mesh)
+	USkeletalMeshComponent* Mesh1P;
+
+	/** First person camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* FirstPersonCameraComponent;
+
+	/** Returns Mesh1P subobject **/
+	UFUNCTION(BlueprintCallable)
+	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	
+	/** Returns FirstPersonCameraComponent subobject **/
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	
+//////////////////////////////////////////////////////////////////
+
+	
 //////////////////////////////////////////////////////////////////
 /// Weapon system
 
@@ -193,21 +209,6 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
-
-	/* 
-	 * Configures input for touchscreen devices if there is a valid touch interface for doing so 
-	 *
-	 * @param	InputComponent	The input component pointer to bind controls to
-	 * @returns true if touch controls were enabled.
-	 */
-	bool EnableTouchscreenMovement(UInputComponent* InputComponent);
-
-public:
-	/** Returns Mesh1P subobject **/
-	UFUNCTION(BlueprintCallable)
-	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
-	/** Returns FirstPersonCameraComponent subobject **/
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
+	
 };
 
