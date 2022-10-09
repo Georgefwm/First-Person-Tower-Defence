@@ -21,6 +21,9 @@ APlayerCharacter::APlayerCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
+
+	//// Client ////
+	
 	// set our turn rates for input
 	TurnRateGamepad = 45.f;
 
@@ -34,10 +37,21 @@ APlayerCharacter::APlayerCharacter()
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	Mesh1P->SetOnlyOwnerSee(true);
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
-	Mesh1P->bCastDynamicShadow = true;
-	Mesh1P->CastShadow = true;
+	Mesh1P->bCastDynamicShadow = false;
+	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
+
+	//// Server ////
+	
+	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
+	USkeletalMeshComponent* Mesh3P = this->GetMesh();
+	Mesh3P->SetOwnerNoSee(true);
+	Mesh3P->SetupAttachment(FirstPersonCameraComponent);
+	Mesh3P->bCastDynamicShadow = true;
+	Mesh3P->CastShadow = true;
+	Mesh3P->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	Mesh3P->SetRelativeLocation(FVector(0.0f, 0.0f, -95.0f));
 
 	this->CurrentHealthPoints = this->MaxHealthPoints;
 	this->CurrentMetal = this->MaxMetal;
@@ -288,5 +302,5 @@ void APlayerCharacter::LineTrace(FHitResult& HitRes, double Distance)
 	FVector To = From + (Rotation.Vector() * Distance);
 
 	FCollisionQueryParams TraceParms;
-	GetWorld()->LineTraceSingleByChannel(HitRes, From, to, ECC_Visibility, TraceParms);
+	GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParms);
 }
