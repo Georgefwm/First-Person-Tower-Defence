@@ -26,7 +26,28 @@ void AWeapon::BeginPlay()
 
 void AWeapon::PrimaryFire()
 {
+	Server_PrimaryFire();
 	
+}
+
+bool AWeapon::Server_PrimaryFire_Validate()
+{
+	return true;
+}
+
+void AWeapon::Server_PrimaryFire_Implementation()
+{
+	Multi_PrimaryFire();
+}
+
+bool AWeapon::Multi_PrimaryFire_Validate()
+{
+	return true;
+}
+
+void AWeapon::Multi_PrimaryFire_Implementation()
+{
+	WeaponMesh->PlayAnimation(FireAnimation, false);
 }
 
 void AWeapon::SecondaryFire()
@@ -35,19 +56,68 @@ void AWeapon::SecondaryFire()
 
 void AWeapon::Reload()
 {
+	WeaponMesh->PlayAnimation(ReloadAnimation, false);
 }
 
 void AWeapon::OnEquip()
 {
-	this->SetActorHiddenInGame(false);
-	this->IsActiveWeapon = true;
+	SetActorHiddenInGame(false);
+	IsActiveWeapon = true;
+
+	Server_OnEquip();
+}
+
+bool AWeapon::Server_OnEquip_Validate()
+{
+	return true;
+}
+
+void AWeapon::Server_OnEquip_Implementation()
+{
+	Multi_OnEquip();
+}
+
+bool AWeapon::Multi_OnEquip_Validate()
+{
+	return true;
+}
+
+void AWeapon::Multi_OnEquip_Implementation()
+{
+	SetActorHiddenInGame(false);
+	IsActiveWeapon = true;
 }
 
 void AWeapon::OnUnEquip()
 {
-	this->SetActorHiddenInGame(true);
-	this->IsActiveWeapon = false;
+	SetActorHiddenInGame(true);
+	IsActiveWeapon = false;
+
+	Server_OnUnEquip();
 }
+
+bool AWeapon::Server_OnUnEquip_Validate()
+{
+	return true;
+}
+
+void AWeapon::Server_OnUnEquip_Implementation()
+{
+	Multi_OnUnEquip();
+}
+
+bool AWeapon::Multi_OnUnEquip_Validate()
+{
+	return true;
+}
+
+void AWeapon::Multi_OnUnEquip_Implementation()
+{
+	SetActorHiddenInGame(true);
+	IsActiveWeapon = false;
+}
+
+
 
 // FHitResult AWeapon::DoLineTrace()
 // {

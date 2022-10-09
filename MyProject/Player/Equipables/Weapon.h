@@ -23,7 +23,7 @@ public:
 	void BeginPlay() override;
 	
 
-	/** Sound to play each time we fire */
+	/** Weapon skeletal mesh */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
 	USkeletalMeshComponent* WeaponMesh;
 
@@ -50,17 +50,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool IsActiveWeapon;
 
-	/** Make the weapon Fire a Projectile */
-	UFUNCTION(BlueprintCallable, Category="Backend")
-	virtual void PrimaryFire();
 	
-	/** Make the weapon Fire a Projectile */
-	UFUNCTION(BlueprintCallable, Category="Backend")
-	virtual void SecondaryFire();
-
-	/** Reload Weapon */
-	UFUNCTION(BlueprintCallable, Category="Backend")
-	virtual void Reload();
 
 	/** Current Ammo */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
@@ -83,16 +73,53 @@ public:
 	float FireCooldown;
 
 	UFUNCTION(BlueprintCallable)
-	USkeletalMeshComponent* GetWeaponMesh() { return Mesh; }
+	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 
+	/** Make the weapon Fire a Projectile */
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	virtual void PrimaryFire();
 	
-public:
-	/** The Character holding this weapon*/
-	USkeletalMeshComponent* Mesh;
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void Server_PrimaryFire();
+	virtual bool Server_PrimaryFire_Validate();
+	virtual void Server_PrimaryFire_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	virtual void Multi_PrimaryFire();
+	virtual bool Multi_PrimaryFire_Validate();
+	virtual void Multi_PrimaryFire_Implementation();
+	
+	/** Make the weapon Fire a Projectile */
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	virtual void SecondaryFire();
+
+	/** Reload Weapon */
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	virtual void Reload();
 
 	UFUNCTION()
 	virtual void OnEquip();
 
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	virtual void Server_OnEquip();
+	virtual bool Server_OnEquip_Validate();
+	virtual void Server_OnEquip_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	virtual void Multi_OnEquip();
+	virtual bool Multi_OnEquip_Validate();
+	virtual void Multi_OnEquip_Implementation();
+
 	UFUNCTION()
 	virtual void OnUnEquip();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	virtual void Server_OnUnEquip();
+	virtual bool Server_OnUnEquip_Validate();
+	virtual void Server_OnUnEquip_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	virtual void Multi_OnUnEquip();
+	virtual bool Multi_OnUnEquip_Validate();
+	virtual void Multi_OnUnEquip_Implementation();
 };

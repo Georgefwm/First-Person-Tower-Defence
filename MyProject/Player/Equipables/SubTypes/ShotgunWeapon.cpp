@@ -20,18 +20,7 @@ AShotgunWeapon::AShotgunWeapon()
 
 void AShotgunWeapon::PrimaryFire()
 {
-	if (this->FireCooldown <= 0)
-	{
-		WeaponMesh->PlayAnimation(FireAnimation, false);
-	}
-	else
-	{
-		// stop bes things happening if tower doesnt attack for a looooong time
-		if (this->FireCooldown <= 0) this->FireCooldown = -1;
-		else this->FireCooldown -= GetWorld()->DeltaTimeSeconds;;
-	}
-	
-	
+	Super::PrimaryFire();
 }
 
 void AShotgunWeapon::SecondaryFire()
@@ -41,7 +30,7 @@ void AShotgunWeapon::SecondaryFire()
 
 void AShotgunWeapon::Reload()
 {
-	WeaponMesh->PlayAnimation(ReloadAnimation, false);
+	Super::Reload();
 }
 
 void AShotgunWeapon::OnEquip()
