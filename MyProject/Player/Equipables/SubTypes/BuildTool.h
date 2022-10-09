@@ -39,6 +39,9 @@ public:
 	UFUNCTION()
 	void CloseBuildMenu();
 
+	UFUNCTION(BlueprintCallable)
+	void SetSelectedBuilding(int Index);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -59,7 +62,4 @@ public:
 	virtual void OnEquip() override;
 	
 	virtual void OnUnEquip() override;
-
-	UFUNCTION(BlueprintCallable)
-	void SetSelectedBuilding(int Index);
 };

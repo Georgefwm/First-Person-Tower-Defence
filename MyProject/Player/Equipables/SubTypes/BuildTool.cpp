@@ -102,8 +102,6 @@ void ABuildTool::Tick(float DeltaTime)
 
 void ABuildTool::PrimaryFire()
 {
-	Super::PrimaryFire();
-
 	if (!MenuOpen && this->IsActiveWeapon)
 	{
 		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetAttachParentActor());
@@ -168,15 +166,15 @@ void ABuildTool::PrimaryFire()
 
 void ABuildTool::SecondaryFire()
 {
-	Super::SecondaryFire();
+	
 }
 
 void ABuildTool::Reload()
 {
-	Super::Reload();
-	
-	if (MenuOpen) CloseBuildMenu();
-	else OpenBuildMenu();
+	if (MenuOpen)
+		CloseBuildMenu();
+	else
+		OpenBuildMenu();
 	
 }
 
