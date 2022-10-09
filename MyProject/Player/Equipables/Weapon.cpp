@@ -11,6 +11,9 @@
 
 AWeapon::AWeapon()
 {
+	// Server
+	bReplicates = true;
+	
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComponent");
 
 	ClipSize = 10;

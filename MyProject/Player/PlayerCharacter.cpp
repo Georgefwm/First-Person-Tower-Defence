@@ -43,6 +43,7 @@ APlayerCharacter::APlayerCharacter()
 	Mesh1P->SetRelativeLocation(FVector(26.67f, 6.31f, -158.7f));
 
 	//// Server ////
+	bReplicates = true;
 	
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	USkeletalMeshComponent* Mesh3P = this->GetMesh();
