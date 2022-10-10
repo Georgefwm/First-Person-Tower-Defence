@@ -11,10 +11,12 @@
 
 AWeapon::AWeapon()
 {
-	// Server
 	bReplicates = true;
 	
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComponent");
+
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
 
 	ClipSize = 10;
 	Ammo = ClipSize;
@@ -30,7 +32,6 @@ void AWeapon::BeginPlay()
 void AWeapon::PrimaryFire()
 {
 	Server_PrimaryFire();
-	
 }
 
 bool AWeapon::Server_PrimaryFire_Validate()
