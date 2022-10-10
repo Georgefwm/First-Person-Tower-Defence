@@ -93,6 +93,16 @@ public:
 	UFUNCTION()
 	void SetupWeapons();
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SetupWeapons();
+	bool Server_SetupWeapons_Validate();
+	void Server_SetupWeapons_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void Multi_SetupWeapons();
+	bool Multi_SetupWeapons_Validate();
+	void Multi_SetupWeapons_Implementation();
+
 	/**
 	 * @brief Handles weapon switching. Shows/hides models, and sets active weapon.
 	 * @param Slot : Set the index of the weapon array to be active at this time

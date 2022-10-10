@@ -11,6 +11,7 @@
 #include "Components/InputComponent.h"
 #include "Equipables/Weapon.h"
 #include "GameFramework/InputSettings.h"
+#include "Net/UnrealNetwork.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -18,11 +19,10 @@
 
 APlayerCharacter::APlayerCharacter()
 {
+	
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
-
-
-	//// Client ////
 	
 	// set our turn rates for input
 	TurnRateGamepad = 45.f;
@@ -42,8 +42,7 @@ APlayerCharacter::APlayerCharacter()
 	Mesh1P->SetRelativeRotation(FRotator(7.3f, -23.19f, 5.02f));
 	Mesh1P->SetRelativeLocation(FVector(26.67f, 6.31f, -158.7f));
 
-	//// Server ////
-	bReplicates = true;
+	
 	
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	USkeletalMeshComponent* Mesh3P = this->GetMesh();
@@ -52,7 +51,7 @@ APlayerCharacter::APlayerCharacter()
 	Mesh3P->bCastDynamicShadow = true;
 	Mesh3P->CastShadow = true;
 	Mesh3P->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-	Mesh3P->SetRelativeLocation(FVector(0.0f, 0.0f, -95.0f));
+	Mesh3P->SetRelativeLocation(FVector(0.0f, 0.0f, -160.0f));
 
 	this->CurrentHealthPoints = this->MaxHealthPoints;
 	this->CurrentMetal = this->MaxMetal;
@@ -69,16 +68,17 @@ APlayerCharacter::APlayerCharacter()
 			CurrentWidget->AddToViewport();
 		}
 	}
-	
+	bReplicates = true;
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-    
-    if (Mesh1P != nullptr)
-	   SetupWeapons();
+
+	if (this->HasAuthority())
+		if (Mesh1P != nullptr)
+			SetupWeapons();
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -179,44 +179,99 @@ void APlayerCharacter::OnReload()
 
 void APlayerCharacter::SetupWeapons()
 {
+	if (!HasAuthority())
+	{
+		Server_SetupWeapons();
+	}
+	else
+	{
+		EquippedWeapon = GetWorld()->SpawnActor<AWeapon>(PrimaryWeaponClass);
+		if (EquippedWeapon)
+		{
+			EquippedWeapon->SetActorHiddenInGame(false);
+			EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+			EquippedWeapon->IsActiveWeapon = true;
+			Weapons.Add(EquippedWeapon);
+		}
+			
+		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(SecondaryWeaponClass))
+		{
+			Weapon->SetActorHiddenInGame(true);
+			Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+			Weapon->IsActiveWeapon = false;
+			Weapons.Add(Weapon);
+		}
+		
+		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(BuildToolClass))
+		{
+			Weapons.Add(Weapon);
+			Weapon->SetActorHiddenInGame(true);
+			Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+			Weapon->IsActiveWeapon = false;
+			Weapons.Add(EquippedWeapon);
+		}
+	}
+}
+
+bool APlayerCharacter::Server_SetupWeapons_Validate()
+{
+	return true;
+}
+
+void APlayerCharacter::Server_SetupWeapons_Implementation()
+{
+	Multi_SetupWeapons();
+}
+
+bool APlayerCharacter::Multi_SetupWeapons_Validate()
+{
+	return true;
+}
+
+void APlayerCharacter::Multi_SetupWeapons_Implementation()
+{
 	EquippedWeapon = GetWorld()->SpawnActor<AWeapon>(PrimaryWeaponClass);
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->SetActorHiddenInGame(false);
 		EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
 		EquippedWeapon->IsActiveWeapon = true;
-		
 		Weapons.Add(EquippedWeapon);
 	}
-		
+			
 	if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(SecondaryWeaponClass))
 	{
 		Weapon->SetActorHiddenInGame(true);
 		Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
 		Weapon->IsActiveWeapon = false;
-		
 		Weapons.Add(Weapon);
 	}
-	
+		
 	if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(BuildToolClass))
 	{
 		Weapons.Add(Weapon);
 		Weapon->SetActorHiddenInGame(true);
 		Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
 		Weapon->IsActiveWeapon = false;
-
 		Weapons.Add(EquippedWeapon);
 	}
-	
 }
+
 
 void APlayerCharacter::SwitchWeapon(unsigned int Slot)
 {
-	if (Weapons[Slot] != EquippedWeapon)
+	if (Weapons.IsValidIndex(Slot))
 	{
-		EquippedWeapon->OnUnEquip();
-		EquippedWeapon = Weapons[Slot];
-		EquippedWeapon->OnEquip();
+		if (Weapons[Slot] != EquippedWeapon)
+		{
+			EquippedWeapon->OnUnEquip();
+			EquippedWeapon = Weapons[Slot];
+			EquippedWeapon->OnEquip();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("INVALID WEAPON INDEX"));
 	}
 }
 
