@@ -28,7 +28,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int MaxHealthPoints = 100;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int HealthPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
