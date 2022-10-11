@@ -106,9 +106,9 @@ public:
 	void SwitchWeapon(unsigned int Slot);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SwitchWeapon(AWeapon* NewWeapon);
-	bool Server_SwitchWeapon_Validate(AWeapon* NewWeapon);
-	void Server_SwitchWeapon_Implementation(AWeapon* NewWeapon);
+	void Server_SwitchWeapon(unsigned int Slot);
+	bool Server_SwitchWeapon_Validate(unsigned int Slot);
+	void Server_SwitchWeapon_Implementation(unsigned int Slot);
 
 	UFUNCTION()
 	void OnReload();

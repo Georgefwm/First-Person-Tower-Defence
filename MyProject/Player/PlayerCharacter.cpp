@@ -72,7 +72,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APlayerCharacter, EquippedWeapon);
-	DOREPLIFETIME(APlayerCharacter, PreviousWeapon);
+	//DOREPLIFETIME(APlayerCharacter, PreviousWeapon);
 	DOREPLIFETIME(APlayerCharacter, Weapons);
 }
 
@@ -82,34 +82,29 @@ void APlayerCharacter::BeginPlay()
 	
 	if(HasAuthority())
 	{
-		EquippedWeapon = GetWorld()->SpawnActor<AWeapon>(PrimaryWeaponClass);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		
+		EquippedWeapon = GetWorld()->SpawnActor<AWeapon>(PrimaryWeaponClass, SpawnParams);
 		if (EquippedWeapon)
 		{
-			EquippedWeapon->SetOwner(this);
 			PreviousWeapon = EquippedWeapon;
-			EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
 			EquippedWeapon->OnEquip();
 			Weapons.Add(EquippedWeapon);
 
 			// Now tell server
 			OnRep_AttachWeapon();
 		}
-			
-		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(SecondaryWeaponClass))
+		
+		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(SecondaryWeaponClass, SpawnParams))
 		{
 			Weapon->OnUnEquip();
-			Weapon->SetOwner(this);
-			Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
 			Weapons.Add(Weapon);
 		}
 		
-		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(BuildToolClass))
+		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(BuildToolClass, SpawnParams))
 		{
-			
 			Weapon->OnUnEquip();
-			Weapon->SetOwner(this);
-			Weapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
-
 			Weapons.Add(Weapon);
 		}
 	}
@@ -207,30 +202,26 @@ void APlayerCharacter::OnSecondaryActionReleased()
 
 void APlayerCharacter::OnReload()
 {
-	if (IsValid(EquippedWeapon))
+	if (EquippedWeapon)
 		EquippedWeapon->Reload();
 }
 
-
-
 void APlayerCharacter::OnRep_AttachWeapon()
 {
-	if (PreviousWeapon)
-	{
-		PreviousWeapon->OnUnEquip();
-	}
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->OnEquip();
-		if (IsLocallyControlled())
+		
+		if (true || IsLocallyControlled()) // TODO: Fix Attachment to hand weirdness
 		{
-			if (Mesh1P != nullptr)
-				EquippedWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+			EquippedWeapon->AttachToComponent(GetMesh1P(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				FName("GripPoint"));
 		}
 		else
 		{
-			if (GetMesh() != nullptr)
-				EquippedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName());
+			EquippedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				FName("GripPoint"));
 		}
 	}
 }
@@ -241,13 +232,13 @@ void APlayerCharacter::SwitchWeapon(unsigned int Slot)
 	{
 		if (Weapons[Slot] != EquippedWeapon)
 		{
-			PreviousWeapon = EquippedWeapon;
-			PreviousWeapon->OnUnEquip();
-			
+			EquippedWeapon->OnUnEquip();
 			EquippedWeapon = Weapons[Slot];
 			EquippedWeapon->OnEquip();
 
-			Server_SwitchWeapon(EquippedWeapon);
+			
+			Server_SwitchWeapon(Slot);
+			OnRep_AttachWeapon();
 		}
 	}
 	else
@@ -256,14 +247,16 @@ void APlayerCharacter::SwitchWeapon(unsigned int Slot)
 	}
 }
 
-bool APlayerCharacter::Server_SwitchWeapon_Validate(AWeapon* NewWeapon)
+bool APlayerCharacter::Server_SwitchWeapon_Validate(unsigned int Slot)
 {
 	return true;
 }
 
-void APlayerCharacter::Server_SwitchWeapon_Implementation(AWeapon* NewWeapon)
+void APlayerCharacter::Server_SwitchWeapon_Implementation(unsigned int Slot)
 {
-	EquippedWeapon = NewWeapon;
+	EquippedWeapon->OnUnEquip();
+	EquippedWeapon = Weapons[Slot];
+	
 	OnRep_AttachWeapon();
 }
 
