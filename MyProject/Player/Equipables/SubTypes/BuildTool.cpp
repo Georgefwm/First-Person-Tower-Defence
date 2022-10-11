@@ -71,7 +71,7 @@ void ABuildTool::CloseBuildMenu()
 {
 	if (BuildToolMenuWidget != nullptr)
 	{
-		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetAttachParentActor());
+		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
 		if (OwningPlayer != nullptr)
 		{
 			OwningPlayer->GetLocalViewingPlayerController()->bShowMouseCursor = false;
@@ -99,18 +99,15 @@ void ABuildTool::BeginPlay()
 void ABuildTool::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 }
 
 void ABuildTool::PrimaryFire()
 {
 	if (!MenuOpen && this->IsActiveWeapon)
 	{
-		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetAttachParentActor());
+		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
 		if (OwningPlayer == nullptr)
 			return;
-
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Looking for building placement"));
 
 		FMinimalViewInfo CameraView;
 		OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
@@ -118,10 +115,9 @@ void ABuildTool::PrimaryFire()
 		// Clamp Y axis rotation so the player can't spawn buildings directly above/below them
 		UE::Math::TVector<double> ClampedCameraRotation = CameraView.Rotation.Vector();
 		ClampedCameraRotation.Z = UE::Geometry::VectorUtil::Clamp(ClampedCameraRotation.Z, -0.5, 0.5);
-		
 		FVector CameraViewFlatForwardVector = CameraView.Location + ClampedCameraRotation;
 
-		double ForwardBuildDistance = 200;
+		double ForwardBuildDistance = 150;
 
 		// EW. Maths
 		// Calculate the distance that the building should spawn regardless of the camera pitch
@@ -135,7 +131,7 @@ void ABuildTool::PrimaryFire()
 		FVector From = Location;
 		FVector To = Location + Down * 250;
 
-		DrawDebugLine(GetWorld(), CameraViewFlatForwardVector, From, FColor(255, 0, 0), true, -1);
+		//DrawDebugLine(GetWorld(), CameraViewFlatForwardVector, From, FColor(255, 0, 0), true, -1);
 
 		FHitResult HitRes;
 		
@@ -148,19 +144,15 @@ void ABuildTool::PrimaryFire()
 			// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
 			// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
 		
-			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
+			//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
 		
 			Location = HitRes.ImpactPoint;
 		
 			// We only want the building to face the direction the player is facing (for now)
 			double DesiredYaw = GetActorForwardVector().ToOrientationRotator().Yaw;
 			FRotator Rotation = { 0, DesiredYaw, 0 };
-			
-			FActorSpawnParameters SpawnInfo;
-			// No janky spawning locations please :)
-			SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-			
-			GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation, SpawnInfo);
+
+			Server_SpawnBuilding(Buildings[SelectedBuildingIndex], Location, Rotation, this);
 		}
 
 	}
@@ -183,18 +175,29 @@ void ABuildTool::Reload()
 void ABuildTool::OnEquip()
 {
 	Super::OnEquip();
-	// controllerRef->SetInputMode(FInputModeGameOnly())
 }
 
 void ABuildTool::OnUnEquip()
 {
 	Super::OnUnEquip();
+	
+	if (MenuOpen)
+	{
+		CloseBuildMenu();
+	}
+}
 
-	
-	// if (MenuOpen)
-	// 	CloseBuildMenu();
-	
-	
+bool ABuildTool::Server_SpawnBuilding_Validate(TSubclassOf<ABuilding> BuildingClass, FVector Location,
+	FRotator Rotation, AActor *BuildingOwner)
+{
+	return true;
+}
+
+void ABuildTool::Server_SpawnBuilding_Implementation(TSubclassOf<ABuilding> BuildingClass, FVector Location,
+	FRotator Rotation, AActor *BuildingOwner)
+{
+	ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
+	NewBuilding->SetOwner(this);
 }
 
 void ABuildTool::SetSelectedBuilding(int Index)

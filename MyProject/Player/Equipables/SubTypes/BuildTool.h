@@ -62,4 +62,9 @@ public:
 	virtual void OnEquip() override;
 	
 	virtual void OnUnEquip() override;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SpawnBuilding(TSubclassOf<ABuilding> BuildingClass, FVector Location, FRotator Rotation, AActor *BuildingOwner);
+	bool Server_SpawnBuilding_Validate(TSubclassOf<ABuilding> BuildingClass, FVector Location, FRotator Rotation, AActor *BuildingOwner);
+	void Server_SpawnBuilding_Implementation(TSubclassOf<ABuilding> BuildingClass, FVector Location, FRotator Rotation, AActor *BuildingOwner);
 };
