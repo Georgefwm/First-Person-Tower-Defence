@@ -15,6 +15,7 @@ ABuilding::ABuilding()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 }
 
 FVector ABuilding::GetSearchPosition()
@@ -27,6 +28,8 @@ FVector ABuilding::GetSearchPosition()
 void ABuilding::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LastAttackTime = GetWorld()->GetTimeSeconds();
 }
 
 void ABuilding::Build(float DeltaTime)

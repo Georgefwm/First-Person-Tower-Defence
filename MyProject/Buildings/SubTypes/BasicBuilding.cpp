@@ -14,6 +14,8 @@ ABasicBuilding::ABasicBuilding()
 	BaseModel->SetRelativeRotation(this->GetActorRotation());
 	BaseModel->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
+	
+	
 	MaxHealthPoints = 1000;
 	CurrentHealthPoints = 1;
 	AttackRange = 1000;
@@ -53,24 +55,17 @@ void ABasicBuilding::Attack(float DeltaTime)
 	CheckForNewTarget();
 
 	// Attack target if we can and there is one
-	if (this->AttackCooldown <= 0 && this->CurrentTarget)
+	const float CurrentTime = GetWorld()->GetTimeSeconds();
+	
+	if (CurrentTime - LastAttackTime > AttackCooldown && CurrentTarget)
 	{
-		
-
-		// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, HitRes.GetActor()->GetName());
-		
 		// Only deal damage if there is nothing in the way
-		if (this->HasLineOfSight())
+		if (HasLineOfSight())
 		{
-			this->CurrentTarget->ApplyDamage(this->AttackDamage);
-			this->AttackCooldown = this->AttackSpeed;
+			CurrentTarget->ApplyDamage(AttackDamage);
+
+			LastAttackTime = CurrentTime;
 		}
-	}
-	else
-	{
-		// stop bes things happening if tower doesnt attack for a looooong time
-		if (this->AttackCooldown <= 0) AttackCooldown = -1;
-		else this->AttackCooldown -= DeltaTime;
 	}
 }
 
@@ -79,12 +74,12 @@ void ABasicBuilding::CheckForNewTarget()
 	Super::CheckForNewTarget();
 
 	AEnemy* NextTarget = nullptr;
-	float ShortestDistance = static_cast<float>(this->AttackRange);
+	float ShortestDistance = static_cast<float>(AttackRange); // Set maximum distance that we can attack
 	
-	if (IsValid(this->CurrentTarget))
+	if (IsValid(CurrentTarget))
 	{
-		NextTarget = this->CurrentTarget;
-		ShortestDistance = FVector::Dist(this->GetActorLocation(), this->CurrentTarget->GetActorLocation());
+		NextTarget = CurrentTarget;
+		ShortestDistance = FVector::Dist(GetActorLocation(), CurrentTarget->GetActorLocation());
 	}
 	
 	TArray<AActor*> Actors;
@@ -94,14 +89,13 @@ void ABasicBuilding::CheckForNewTarget()
 	{
 		AEnemy* Enemy = Cast<AEnemy>(e);
 		if (Enemy)
-		{
-			if (FVector::Dist(this->GetActorLocation() + this->GetActorUpVector() * 200, Enemy->GetActorLocation()) < ShortestDistance)
+		{														// 200 should be building gun barrel height (or middle)
+			if (FVector::Dist(GetActorLocation() + GetActorUpVector() * 200, Enemy->GetActorLocation()) < ShortestDistance)
 			{
 				NextTarget = Enemy;
 			}
 		}
 	}
-
-	this->CurrentTarget = NextTarget;
+	CurrentTarget = NextTarget;
 }
 

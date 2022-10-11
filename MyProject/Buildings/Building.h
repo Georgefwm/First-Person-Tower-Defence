@@ -43,6 +43,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float AttackCooldown = 0;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	float LastAttackTime;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float BuildTime = 5;
 
