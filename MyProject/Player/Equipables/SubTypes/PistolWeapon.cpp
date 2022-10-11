@@ -5,6 +5,8 @@
 
 APistolWeapon::APistolWeapon()
 {
+	WeaponType = EWeaponType::Pistol;
+	
 	ClipSize = 12;
 	Ammo = ClipSize;
 	ReloadSpeed = 1.0;

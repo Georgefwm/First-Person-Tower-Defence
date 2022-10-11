@@ -7,6 +7,7 @@
 // Sets default values
 AShotgunWeapon::AShotgunWeapon()
 {
+	WeaponType = EWeaponType::Shotgun;
 	//LastFireTime = GetWorld()->TimeSeconds;
 	
 	ClipSize = 8;

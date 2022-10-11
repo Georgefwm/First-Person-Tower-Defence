@@ -8,9 +8,15 @@
 #include "Weapon.generated.h"
 
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum EWeaponType
+{
+	Shotgun UMETA(Displayname, "Shotgun"),
+	Rifle UMETA(Displayname, "Rifle"),
+	Pistol UMETA(Displayname, "Pistol"),
+	BuildTool UMETA(Displayname, "Build Tool")
+};
+
 UCLASS()
 class MYPROJECT_API AWeapon : public AActor
 {
@@ -21,7 +27,9 @@ public:
 	AWeapon();
 
 	void BeginPlay() override;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category="Asthetic")
+	TEnumAsByte<EWeaponType> WeaponType;
 
 	/** Weapon skeletal mesh */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
@@ -49,9 +57,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsActiveWeapon;
-
 	
-
 	/** Current Ammo */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
 	int Ammo;
@@ -74,6 +80,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
+
+	UFUNCTION(BlueprintCallable)
+	TEnumAsByte<EWeaponType> GetWeaponType() { return WeaponType; }
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")
@@ -99,27 +108,8 @@ public:
 
 	UFUNCTION()
 	virtual void OnEquip();
-
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	virtual void Server_OnEquip();
-	virtual bool Server_OnEquip_Validate();
-	virtual void Server_OnEquip_Implementation();
-
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	virtual void Multi_OnEquip();
-	virtual bool Multi_OnEquip_Validate();
-	virtual void Multi_OnEquip_Implementation();
-
+	
 	UFUNCTION()
 	virtual void OnUnEquip();
-
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	virtual void Server_OnUnEquip();
-	virtual bool Server_OnUnEquip_Validate();
-	virtual void Server_OnUnEquip_Implementation();
-
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	virtual void Multi_OnUnEquip();
-	virtual bool Multi_OnUnEquip_Validate();
-	virtual void Multi_OnUnEquip_Implementation();
+	
 };

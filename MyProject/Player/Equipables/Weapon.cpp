@@ -11,9 +11,10 @@
 
 AWeapon::AWeapon()
 {
-	bReplicates = true;
-	
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComponent");
+	RootComponent = WeaponMesh;
+
+	bReplicates = true;
 
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -68,60 +69,13 @@ void AWeapon::OnEquip()
 	SetActorHiddenInGame(false);
 	IsActiveWeapon = true;
 
-	Server_OnEquip();
-}
-
-bool AWeapon::Server_OnEquip_Validate()
-{
-	return true;
-}
-
-void AWeapon::Server_OnEquip_Implementation()
-{
-	Multi_OnEquip();
-}
-
-bool AWeapon::Multi_OnEquip_Validate()
-{
-	return true;
-}
-
-void AWeapon::Multi_OnEquip_Implementation()
-{
-	SetActorHiddenInGame(false);
-	IsActiveWeapon = true;
 }
 
 void AWeapon::OnUnEquip()
 {
 	SetActorHiddenInGame(true);
 	IsActiveWeapon = false;
-
-	Server_OnUnEquip();
 }
-
-bool AWeapon::Server_OnUnEquip_Validate()
-{
-	return true;
-}
-
-void AWeapon::Server_OnUnEquip_Implementation()
-{
-	Multi_OnUnEquip();
-}
-
-bool AWeapon::Multi_OnUnEquip_Validate()
-{
-	return true;
-}
-
-void AWeapon::Multi_OnUnEquip_Implementation()
-{
-	SetActorHiddenInGame(true);
-	IsActiveWeapon = false;
-}
-
-
 
 // FHitResult AWeapon::DoLineTrace()
 // {

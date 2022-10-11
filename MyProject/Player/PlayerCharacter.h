@@ -68,6 +68,7 @@ public:
 /// Weapon system
 
 	/** Weapon Slots */
+	UPROPERTY(Replicated)
 	TArray<AWeapon*> Weapons;
 
 	////// Weapon Classes
@@ -85,30 +86,29 @@ public:
 	TSubclassOf<AWeapon> BuildToolClass;
 
 	/** Currently equipped weapon slot */
-	UPROPERTY(EditAnywhere, Category = "Weapon System")
+	UPROPERTY(ReplicatedUsing = OnRep_AttachWeapon)
 	AWeapon* EquippedWeapon;
+
+	/** Currently equipped weapon slot */
+	UPROPERTY(Replicated)
+	AWeapon* PreviousWeapon;
 
 	////// Weapon Functions
 	
 	UFUNCTION()
-	void SetupWeapons();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SetupWeapons();
-	bool Server_SetupWeapons_Validate();
-	void Server_SetupWeapons_Implementation();
-
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	void Multi_SetupWeapons();
-	bool Multi_SetupWeapons_Validate();
-	void Multi_SetupWeapons_Implementation();
-
+	void OnRep_AttachWeapon();
+	
 	/**
 	 * @brief Handles weapon switching. Shows/hides models, and sets active weapon.
 	 * @param Slot : Set the index of the weapon array to be active at this time
 	 */
 	UFUNCTION()
 	void SwitchWeapon(unsigned int Slot);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SwitchWeapon(AWeapon* NewWeapon);
+	bool Server_SwitchWeapon_Validate(AWeapon* NewWeapon);
+	void Server_SwitchWeapon_Implementation(AWeapon* NewWeapon);
 
 	UFUNCTION()
 	void OnReload();

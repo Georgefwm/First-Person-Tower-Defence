@@ -16,6 +16,8 @@
 // Sets default values
 ABuildTool::ABuildTool()
 {
+	WeaponType = EWeaponType::BuildTool;
+	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -187,9 +189,12 @@ void ABuildTool::OnEquip()
 void ABuildTool::OnUnEquip()
 {
 	Super::OnUnEquip();
+
 	
-	if (MenuOpen)
-		CloseBuildMenu();
+	// if (MenuOpen)
+	// 	CloseBuildMenu();
+	
+	
 }
 
 void ABuildTool::SetSelectedBuilding(int Index)
