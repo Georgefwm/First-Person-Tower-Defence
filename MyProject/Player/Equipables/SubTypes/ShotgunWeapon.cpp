@@ -9,7 +9,8 @@ AShotgunWeapon::AShotgunWeapon()
 {
 	WeaponType = EWeaponType::Shotgun;
 	//LastFireTime = GetWorld()->TimeSeconds;
-	
+
+	Damage = 50;
 	ClipSize = 8;
 	Ammo = ClipSize;
 	ReloadSpeed = 2.0;

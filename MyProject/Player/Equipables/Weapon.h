@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "../PlayerCharacter.h"
 #include "GameFramework/Actor.h"
+#include "MyProject/Enemies/Enemy.h"
 #include "Weapon.generated.h"
 
 
@@ -15,6 +16,13 @@ enum EWeaponType
 	Rifle UMETA(Displayname, "Rifle"),
 	Pistol UMETA(Displayname, "Pistol"),
 	BuildTool UMETA(Displayname, "Build Tool")
+};
+
+UENUM(BlueprintType)
+enum EFireLogicType
+{
+	Hitscan,
+	Projectile
 };
 
 UCLASS()
@@ -30,6 +38,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Asthetic")
 	TEnumAsByte<EWeaponType> WeaponType;
+
+	UPROPERTY(VisibleAnywhere, Category="Core Logic")
+	TEnumAsByte<EFireLogicType> FireLogic;
 
 	/** Weapon skeletal mesh */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
@@ -57,6 +68,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsActiveWeapon;
+
+	/** Damage from 1 hit */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	int Damage;
 	
 	/** Current Ammo */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
@@ -97,6 +112,11 @@ public:
 	virtual void Multi_PrimaryFire();
 	virtual bool Multi_PrimaryFire_Validate();
 	virtual void Multi_PrimaryFire_Implementation();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_HitscanApplyDamage(FHitResult Hit, double HitDamage);
+	bool Server_HitscanApplyDamage_Validate(FHitResult Hit, double HitDamage);
+	void Server_HitscanApplyDamage_Implementation(FHitResult Hit, double HitDamage);
 	
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")

@@ -19,6 +19,7 @@ AWeapon::AWeapon()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	Damage = 10;
 	ClipSize = 10;
 	Ammo = ClipSize;
 	ReloadSpeed = 1.0;
@@ -53,6 +54,20 @@ bool AWeapon::Multi_PrimaryFire_Validate()
 void AWeapon::Multi_PrimaryFire_Implementation()
 {
 	WeaponMesh->PlayAnimation(FireAnimation, false);
+}
+
+bool AWeapon::Server_HitscanApplyDamage_Validate(FHitResult Hit, double HitDamage)
+{
+	return true;
+}
+
+void AWeapon::Server_HitscanApplyDamage_Implementation(FHitResult Hit, double HitDamage)
+{
+	AEnemy* Enemy = Cast<AEnemy>(Hit.GetActor());
+	if (Enemy)
+	{
+		Enemy->ApplyDamage(HitDamage);
+	}
 }
 
 void AWeapon::SecondaryFire()
