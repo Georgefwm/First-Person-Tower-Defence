@@ -152,7 +152,7 @@ void ABuildTool::PrimaryFire()
 			double DesiredYaw = GetActorForwardVector().ToOrientationRotator().Yaw;
 			FRotator Rotation = { 0, DesiredYaw, 0 };
 
-			Server_SpawnBuilding(Buildings[SelectedBuildingIndex], Location, Rotation, this);
+			ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
 		}
 
 	}
@@ -185,19 +185,6 @@ void ABuildTool::OnUnEquip()
 	{
 		CloseBuildMenu();
 	}
-}
-
-bool ABuildTool::Server_SpawnBuilding_Validate(TSubclassOf<ABuilding> BuildingClass, FVector Location,
-	FRotator Rotation, AActor *BuildingOwner)
-{
-	return true;
-}
-
-void ABuildTool::Server_SpawnBuilding_Implementation(TSubclassOf<ABuilding> BuildingClass, FVector Location,
-	FRotator Rotation, AActor *BuildingOwner)
-{
-	ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
-	NewBuilding->SetOwner(this);
 }
 
 void ABuildTool::SetSelectedBuilding(int Index)
