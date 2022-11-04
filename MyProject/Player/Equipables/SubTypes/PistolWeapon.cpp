@@ -14,16 +14,14 @@ APistolWeapon::APistolWeapon()
 	FireRate = 0.1;
 }
 
-/**
- * Note about hit-scan:
- *
- * we can reduce server and increase (perceived) responsiveness by calculating the hits on the clients machine.
- * In terms of cheat prevention, not very good, but this is a single player/co-op game. If people find a way to cheat,
- * and do so, it will never have an affect on people who play honestly.
- *
- **/
 void APistolWeapon::PrimaryFire()
 {
+	if (this->Ammo <= 0)
+	{
+		// TODO: play empty sound
+		return;
+	}
+	
 	Super::PrimaryFire();
 	
 	APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
@@ -49,7 +47,7 @@ void APistolWeapon::PrimaryFire()
 		if (Enemy)
 		{
 			// Tell the server about our hit result
-			Server_HitscanApplyDamage(HitRes, Damage);
+			Enemy->HandleHit(HitRes, Damage);
 		}
 	}
 }

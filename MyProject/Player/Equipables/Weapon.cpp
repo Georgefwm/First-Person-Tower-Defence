@@ -14,8 +14,6 @@ AWeapon::AWeapon()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComponent");
 	RootComponent = WeaponMesh;
 
-	bReplicates = true;
-
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -29,46 +27,17 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetActorHiddenInGame(false);
 }
 
 void AWeapon::PrimaryFire()
 {
-	Server_PrimaryFire();
-}
-
-bool AWeapon::Server_PrimaryFire_Validate()
-{
-	return true;
-}
-
-void AWeapon::Server_PrimaryFire_Implementation()
-{
-	Multi_PrimaryFire();
-}
-
-bool AWeapon::Multi_PrimaryFire_Validate()
-{
-	return true;
-}
-
-void AWeapon::Multi_PrimaryFire_Implementation()
-{
 	WeaponMesh->PlayAnimation(FireAnimation, false);
+	this->Ammo -= 1;
 }
 
-bool AWeapon::Server_HitscanApplyDamage_Validate(FHitResult Hit, double HitDamage)
-{
-	return true;
-}
 
-void AWeapon::Server_HitscanApplyDamage_Implementation(FHitResult Hit, double HitDamage)
-{
-	AEnemy* Enemy = Cast<AEnemy>(Hit.GetActor());
-	if (Enemy)
-	{
-		Enemy->ApplyDamage(HitDamage);
-	}
-}
 
 void AWeapon::SecondaryFire()
 {
@@ -76,18 +45,29 @@ void AWeapon::SecondaryFire()
 
 void AWeapon::Reload()
 {
+	if (GetWorldTimerManager().IsTimerActive(ReloadTimer) || this->Ammo == this->ClipSize)
+	{
+		return;
+	}
+	
 	WeaponMesh->PlayAnimation(ReloadAnimation, false);
+	GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeapon::ApplyReload, this->ReloadSpeed, false);
+}
+
+void AWeapon::ApplyReload()
+{
+	this->Ammo = this->ClipSize;
 }
 
 void AWeapon::OnEquip()
 {
 	SetActorHiddenInGame(false);
 	IsActiveWeapon = true;
-
 }
 
 void AWeapon::OnUnEquip()
 {
+	GetWorldTimerManager().ClearTimer(ReloadTimer);
 	SetActorHiddenInGame(true);
 	IsActiveWeapon = false;
 }

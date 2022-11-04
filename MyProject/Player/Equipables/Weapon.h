@@ -58,6 +58,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asthetic")
 	UAnimationAsset* ReloadAnimation;
 
+	UPROPERTY()
+	FTimerHandle ReloadTimer;
+
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
 	FVector MuzzleOffset;
@@ -103,21 +106,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Backend")
 	virtual void PrimaryFire();
 	
-	UFUNCTION(Server, Reliable, WithValidation)
-	virtual void Server_PrimaryFire();
-	virtual bool Server_PrimaryFire_Validate();
-	virtual void Server_PrimaryFire_Implementation();
-
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	virtual void Multi_PrimaryFire();
-	virtual bool Multi_PrimaryFire_Validate();
-	virtual void Multi_PrimaryFire_Implementation();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_HitscanApplyDamage(FHitResult Hit, double HitDamage);
-	bool Server_HitscanApplyDamage_Validate(FHitResult Hit, double HitDamage);
-	void Server_HitscanApplyDamage_Implementation(FHitResult Hit, double HitDamage);
-	
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")
 	virtual void SecondaryFire();
@@ -125,6 +113,9 @@ public:
 	/** Reload Weapon */
 	UFUNCTION(BlueprintCallable, Category="Backend")
 	virtual void Reload();
+
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	virtual void ApplyReload();
 
 	UFUNCTION()
 	virtual void OnEquip();
