@@ -24,10 +24,6 @@ class APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	
-
-	
-
 public:
 	APlayerCharacter();
 
@@ -68,7 +64,7 @@ public:
 /// Weapon system
 
 	/** Weapon Slots */
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	TArray<AWeapon*> Weapons;
 
 	////// Weapon Classes
@@ -86,17 +82,17 @@ public:
 	TSubclassOf<AWeapon> BuildToolClass;
 
 	/** Currently equipped weapon slot */
-	UPROPERTY(ReplicatedUsing = OnRep_AttachWeapon)
+	UPROPERTY()
 	AWeapon* EquippedWeapon;
 
 	/** Currently equipped weapon slot */
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	AWeapon* PreviousWeapon;
 
 	////// Weapon Functions
 	
 	UFUNCTION()
-	void OnRep_AttachWeapon();
+	void AttachWeapon();
 	
 	/**
 	 * @brief Handles weapon switching. Shows/hides models, and sets active weapon.
@@ -104,11 +100,6 @@ public:
 	 */
 	UFUNCTION()
 	void SwitchWeapon(unsigned int Slot);
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SwitchWeapon(unsigned int Slot);
-	bool Server_SwitchWeapon_Validate(unsigned int Slot);
-	void Server_SwitchWeapon_Implementation(unsigned int Slot);
 
 	UFUNCTION()
 	void OnReload();
@@ -166,6 +157,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
 	int GetCurrentHealthPoints();
 
+	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
+	int GetClipSize();
+	
+	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
+	int GetCurrentClipCount();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
+	int GetMaxMetal();
+	
 	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
 	int GetCurrentMetal();
 	
