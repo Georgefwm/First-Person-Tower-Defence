@@ -14,6 +14,7 @@ ABasicEnemy::ABasicEnemy()
 	USkeletalMeshComponent* MeshComponent = GetMesh();
 	MeshComponent->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	MeshComponent->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
+	MeshComponent->SetRelativeScale3D(FVector(0.8925, 0.8925, 0.8925));
 
 	this->HealthPoints = 100;
 }

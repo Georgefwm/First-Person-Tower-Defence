@@ -28,7 +28,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int MaxHealthPoints = 100;
 	
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int HealthPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
@@ -51,7 +51,13 @@ public:
 	void OnHPUpdate();
 
 	UFUNCTION()
-	void ApplyDamage(int Damage);
+	void HandleHit(FHitResult Hit, int Damage);
+
+	UFUNCTION()
+	void IncrementHealth(int Healing);
+
+	UFUNCTION()
+	void DecrementHealth(int Damage);
 
 	UFUNCTION(BlueprintCallable)
 	int GetHP() { return this->HealthPoints; }
