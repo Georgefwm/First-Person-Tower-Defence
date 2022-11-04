@@ -13,16 +13,13 @@ ABasicBuilding::ABasicBuilding()
 	BaseModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelMesh"));
 	BaseModel->SetRelativeRotation(this->GetActorRotation());
 	BaseModel->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-
-	
 	
 	MaxHealthPoints = 1000;
 	CurrentHealthPoints = 1;
 	AttackRange = 1000;
 	AttackDamage = 2;
 	AttackSpeed = 0.1;
-	BuildTime = 2;
-	
+	BuildTime = 0.1;
 }
 
 FVector ABasicBuilding::GetSearchPosition()
@@ -34,7 +31,6 @@ FVector ABasicBuilding::GetSearchPosition()
 void ABasicBuilding::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -51,21 +47,14 @@ void ABasicBuilding::Build(float DeltaTime)
 void ABasicBuilding::Attack(float DeltaTime)
 {
 	Super::Attack(DeltaTime);
-
-	CheckForNewTarget();
-
-	// Attack target if we can and there is one
-	const float CurrentTime = GetWorld()->GetTimeSeconds();
 	
-	if (CurrentTime - LastAttackTime > AttackCooldown && CurrentTarget)
+	// Attack target if we can and there is one
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	
+	if (CurrentTime - LastAttackTime > AttackSpeed)
 	{
-		// Only deal damage if there is nothing in the way
-		if (HasLineOfSight())
-		{
-			CurrentTarget->ApplyDamage(AttackDamage);
-
-			LastAttackTime = CurrentTime;
-		}
+		CurrentTarget->DecrementHealth(AttackDamage);
+		LastAttackTime = GetWorld()->GetTimeSeconds();
 	}
 }
 
@@ -76,7 +65,7 @@ void ABasicBuilding::CheckForNewTarget()
 	AEnemy* NextTarget = nullptr;
 	float ShortestDistance = static_cast<float>(AttackRange); // Set maximum distance that we can attack
 	
-	if (IsValid(CurrentTarget))
+	if (CurrentTarget != nullptr)
 	{
 		NextTarget = CurrentTarget;
 		ShortestDistance = FVector::Dist(GetActorLocation(), CurrentTarget->GetActorLocation());
@@ -90,7 +79,8 @@ void ABasicBuilding::CheckForNewTarget()
 		AEnemy* Enemy = Cast<AEnemy>(e);
 		if (Enemy)
 		{														// 200 should be building gun barrel height (or middle)
-			if (FVector::Dist(GetActorLocation() + GetActorUpVector() * 200, Enemy->GetActorLocation()) < ShortestDistance)
+			float Distance = FVector::Dist(GetActorLocation() + GetActorUpVector() * 200, Enemy->GetActorLocation());
+			if (Distance < ShortestDistance && HasLineOfSight(Enemy))
 			{
 				NextTarget = Enemy;
 			}

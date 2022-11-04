@@ -46,15 +46,15 @@ void ABuilding::Attack(float DeltaTime)
 	
 }
 
-bool ABuilding::HasLineOfSight()
+bool ABuilding::HasLineOfSight(AEnemy* Target)
 {
 	FVector Location = this->GetSearchPosition();
 
 	FVector From = Location;
-	FVector To = this->CurrentTarget->GetActorLocation();
+	FVector To = Target->GetActorLocation();
 
 	FHitResult HitRes;
-
+	
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this);
 	TraceParams.bFindInitialOverlaps = true;
@@ -67,14 +67,13 @@ bool ABuilding::HasLineOfSight()
 		// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald);
 		// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0));
 
-		return HitRes.GetActor()->GetName().Equals(CurrentTarget->GetName());
+		return HitRes.GetActor()->GetName().Equals(Target->GetName());
 	}
 	return false;
 }
 
 void ABuilding::CheckForNewTarget()
 {
-	
 }
 
 // Called every frame
@@ -83,8 +82,27 @@ void ABuilding::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (FinishedBuilding)
-		Attack(DeltaTime);
+	{
+		UpdateTargeting();
+
+		if (CurrentTarget != nullptr)
+		{
+			Attack(DeltaTime);
+		}
+	}
 	else
 		Build(DeltaTime);
+}
+
+// Called every frame
+void ABuilding::UpdateTargeting()
+{
+	CheckForNewTarget();
+
+	if (CurrentTarget != nullptr)
+	{
+		DrawDebugLine(GetWorld(), this->GetSearchPosition(), CurrentTarget->GetActorLocation(), FColor(255, 0, 0));
+	}
+	// TODO: Update mesh
 }
 

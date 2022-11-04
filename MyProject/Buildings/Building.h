@@ -41,9 +41,6 @@ public:
 	double AttackSpeed = 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	float AttackCooldown = 0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
@@ -74,13 +71,14 @@ protected:
 	UFUNCTION()
 	virtual void Attack(float DeltaTime);
 
-	bool HasLineOfSight();
+	bool HasLineOfSight(AEnemy* Target);
 
 	virtual void CheckForNewTarget();
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void UpdateTargeting();
 
 	// TODO: Implement better target priority system (closest, furthest, highest hp, etc)
 };
