@@ -51,7 +51,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	/** Make the weapon Fire a Projectile */
-	virtual void PrimaryFire() override;
+	virtual void PrimaryFirePressed() override;
 	
 	/** Make the weapon Fire a Projectile */
 	virtual void SecondaryFire() override;

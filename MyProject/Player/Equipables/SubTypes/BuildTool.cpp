@@ -101,7 +101,7 @@ void ABuildTool::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ABuildTool::PrimaryFire()
+void ABuildTool::PrimaryFirePressed()
 {
 	if (!MenuOpen && this->IsActiveWeapon)
 	{
