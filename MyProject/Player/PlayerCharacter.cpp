@@ -82,7 +82,8 @@ void APlayerCharacter::BeginPlay()
 			EquippedWeapon->OnEquip();
 			Weapons.Add(EquippedWeapon);
 			
-			AttachWeapon();
+			EquippedWeapon->AttachToComponent(GetMesh1P(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			FName("GripPoint"));
 		}
 		
 		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(SecondaryWeaponClass, SpawnParams))
@@ -118,11 +119,11 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 
 	// Primary fire Events
 	PlayerInputComponent->BindAction("PrimaryAction", IE_Pressed, this, &APlayerCharacter::OnPrimaryActionPressed);
-	//PlayerInputComponent->BindAction("PrimaryAction", IE_Released, this, &APlayerCharacter::OnPrimaryActionReleased);
+	PlayerInputComponent->BindAction("PrimaryAction", IE_Released, this, &APlayerCharacter::OnPrimaryActionReleased);
 
 	// Secondary fire Events
-	//PlayerInputComponent->BindAction("SecondaryAction", IE_Pressed, this, &APlayerCharacter::OnSecondaryActionPressed);
-	//PlayerInputComponent->BindAction("SecondaryAction", IE_Released, this, &APlayerCharacter::OnSecondaryActionReleased);
+	PlayerInputComponent->BindAction("SecondaryAction", IE_Pressed, this, &APlayerCharacter::OnSecondaryActionPressed);
+	PlayerInputComponent->BindAction("SecondaryAction", IE_Released, this, &APlayerCharacter::OnSecondaryActionReleased);
 
 	// Reload Event
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::OnReload);
@@ -190,13 +191,14 @@ int APlayerCharacter::GetCurrentMetal()
 void APlayerCharacter::OnPrimaryActionPressed()
 {
 	
-	if (IsValid(EquippedWeapon))
-		EquippedWeapon->PrimaryFire();
+	if (EquippedWeapon)
+		EquippedWeapon->PrimaryFirePressed();
 }
 
 void APlayerCharacter::OnPrimaryActionReleased()
 {
-	
+	if (EquippedWeapon)
+		EquippedWeapon->PrimaryFireReleased();
 }
 
 void APlayerCharacter::OnSecondaryActionPressed()
@@ -214,17 +216,6 @@ void APlayerCharacter::OnReload()
 {
 	if (EquippedWeapon)
 		EquippedWeapon->Reload();
-}
-
-void APlayerCharacter::AttachWeapon()
-{
-	if (EquippedWeapon)
-	{
-		EquippedWeapon->OnEquip();
-		
-		EquippedWeapon->AttachToComponent(GetMesh1P(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-			FName("GripPoint"));
-	}
 }
 
 void APlayerCharacter::SwitchWeapon(unsigned int Slot)

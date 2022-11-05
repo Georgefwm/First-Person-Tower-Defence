@@ -1,22 +1,23 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../Weapon.h"
-#include "PistolWeapon.generated.h"
+#include "MyProject/Player/Equipables/Weapon.h"
+#include "SmgWeapon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MYPROJECT_API APistolWeapon : public AWeapon
+class MYPROJECT_API ASmgWeapon : public AWeapon
 {
+
 	GENERATED_BODY()
 	
 public:
 	// Sets default values for this actor's properties
-	APistolWeapon();
+	ASmgWeapon();
 
 	/** Make the weapon Fire a Projectile */
 	virtual void PrimaryFirePressed() override;

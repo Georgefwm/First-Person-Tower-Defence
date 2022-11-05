@@ -15,6 +15,7 @@ enum EWeaponType
 	Shotgun UMETA(Displayname, "Shotgun"),
 	Rifle UMETA(Displayname, "Rifle"),
 	Pistol UMETA(Displayname, "Pistol"),
+	Smg UMETA(Displayname, "SMG"),
 	BuildTool UMETA(Displayname, "Build Tool")
 };
 
@@ -47,8 +48,12 @@ public:
 	USkeletalMeshComponent* WeaponMesh;
 
 	/** Sound to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Acoustic")
 	USoundBase* FireSound;
+
+	/** Sound to play when clip is empy */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Acoustic")
+	USoundBase* EmptySound;
 	
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asthetic")
@@ -60,6 +65,9 @@ public:
 
 	UPROPERTY()
 	FTimerHandle ReloadTimer;
+
+	UPROPERTY()
+	FTimerHandle FireTimer;
 
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
@@ -104,7 +112,13 @@ public:
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")
-	virtual void PrimaryFire();
+	virtual void PrimaryFirePressed();
+
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	virtual void PrimaryFireReleased();
+
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	void FireHitScan();
 	
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")

@@ -17,9 +17,9 @@ AShotgunWeapon::AShotgunWeapon()
 	FireRate = 0.8f;
 }
 
-void AShotgunWeapon::PrimaryFire()
+void AShotgunWeapon::PrimaryFirePressed()
 {
-	Super::PrimaryFire();
+	Super::PrimaryFirePressed();
 }
 
 void AShotgunWeapon::SecondaryFire()

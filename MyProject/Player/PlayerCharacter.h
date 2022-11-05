@@ -91,9 +91,6 @@ public:
 
 	////// Weapon Functions
 	
-	UFUNCTION()
-	void AttachWeapon();
-	
 	/**
 	 * @brief Handles weapon switching. Shows/hides models, and sets active weapon.
 	 * @param Slot : Set the index of the weapon array to be active at this time

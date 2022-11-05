@@ -31,13 +31,56 @@ void AWeapon::BeginPlay()
 	SetActorHiddenInGame(false);
 }
 
-void AWeapon::PrimaryFire()
+void AWeapon::PrimaryFirePressed()
 {
-	WeaponMesh->PlayAnimation(FireAnimation, false);
-	this->Ammo -= 1;
+	
 }
 
+void AWeapon::PrimaryFireReleased()
+{
+	
+}
 
+void AWeapon::FireHitScan()
+{
+	if (this->Ammo <= 0)
+	{
+		// TODO: play empty sound
+		if (EmptySound)
+			UGameplayStatics::PlaySound2D(GetWorld(), EmptySound, 1, 1, 0);
+		return;
+	}
+	
+	APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
+	if (OwningPlayer == nullptr)
+		return;
+
+	if (EmptySound)
+		UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 1, 1, 0);
+	
+	this->Ammo -= 1;
+
+	FMinimalViewInfo CameraView;
+	OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+
+	FHitResult HitRes;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+
+	FVector From = CameraView.Location;
+	FVector To = CameraView.Location + CameraView.Rotation.Vector() * 10000;
+	
+	if (GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams))
+	{
+		DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), false, 0.1);
+		DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, false, 0.1);		
+	
+		if (AEnemy* Enemy = Cast<AEnemy>(HitRes.GetActor()))
+		{
+			Enemy->HandleHit(HitRes, this->Damage);
+		}
+	}
+}
 
 void AWeapon::SecondaryFire()
 {
@@ -49,8 +92,10 @@ void AWeapon::Reload()
 	{
 		return;
 	}
+
+	if (ReloadAnimation)
+		WeaponMesh->PlayAnimation(ReloadAnimation, false);
 	
-	WeaponMesh->PlayAnimation(ReloadAnimation, false);
 	GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeapon::ApplyReload, this->ReloadSpeed, false);
 }
 
@@ -68,6 +113,8 @@ void AWeapon::OnEquip()
 void AWeapon::OnUnEquip()
 {
 	GetWorldTimerManager().ClearTimer(ReloadTimer);
+	GetWorldTimerManager().ClearTimer(FireTimer);
+	
 	SetActorHiddenInGame(true);
 	IsActiveWeapon = false;
 }
