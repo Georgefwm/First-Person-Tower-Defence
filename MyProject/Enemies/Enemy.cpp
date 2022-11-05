@@ -5,6 +5,7 @@
 
 #include "CookerSettings.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -13,6 +14,9 @@ AEnemy::AEnemy()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	HealthPoints = MaxHealthPoints;
+
+	static ConstructorHelpers::FClassFinder<AActor> ClassFinder(TEXT("/Game/Player/CombatText/HeadshotTextBP"));
+	HeadshotTextClass = ClassFinder.Class;
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +41,11 @@ void AEnemy::HandleHit(FHitResult Hit, int Damage)
 	if (BoneName == FString("Bip001-Head"))
 	{
 		FinalDamage *= 3;
+
+		FVector Location = GetActorLocation() +
+			GetActorUpVector() * (GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+		
+		GetWorld()->SpawnActor<AHeadshotText>(HeadshotTextClass, Location, GetActorRotation());
 		// TODO: Play distinct headshot sound
 	}
 	

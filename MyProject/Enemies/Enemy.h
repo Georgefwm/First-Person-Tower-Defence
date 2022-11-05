@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "../Core/TowerDefenceGameMode.h"
 #include "GameFramework/Actor.h"
+#include "MyProject/HeadshotText.h"
 #include "Enemy.generated.h"
 
 
@@ -42,6 +43,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	AActor* Target;
+
+	UPROPERTY(BlueprintReadOnly, Category="Combat text")
+	TSubclassOf<AHeadshotText> HeadshotTextClass;
+
+	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Combat text")
+	// TSubclassOf<AHeadshotText> DamageNumberTextClass;
 
 public:	
 	// Called every frame
