@@ -50,6 +50,8 @@ void AWeapon::FireHitScan()
 			UGameplayStatics::PlaySound2D(GetWorld(), EmptySound, 1, 1, 0);
 		return;
 	}
+
+	GetWorldTimerManager().ClearTimer(ReloadTimer);
 	
 	APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
 	if (OwningPlayer == nullptr)
