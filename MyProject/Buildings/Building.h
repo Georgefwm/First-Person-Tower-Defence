@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "MyProject/Enemies/Enemy.h"
 #include "Building.generated.h"
@@ -33,6 +34,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	double AttackRange = 10000;
+
+	UPROPERTY()
+	UShapeComponent* TargetingArea;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	double AttackDamage = 5;
