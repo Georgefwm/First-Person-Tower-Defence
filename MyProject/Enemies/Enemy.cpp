@@ -37,10 +37,12 @@ void AEnemy::HandleHit(FHitResult Hit, int Damage)
 {
 	int FinalDamage = Damage;
 	
+	// UE_LOG(LogTemp, Warning, TEXT("Damage: %d"), FinalDamage);
+	
 	const FString BoneName = Hit.BoneName.ToString();
 	if (BoneName == FString("Bip001-Head"))
 	{
-		FinalDamage *= 3;
+		FinalDamage *= 2;
 
 		FVector Location = GetActorLocation() +
 			GetActorUpVector() * (GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
@@ -75,6 +77,8 @@ void AEnemy::IncrementHealth(int Healing)
 
 	HealthPoints += Healing;
 
+	
 	OnHPUpdate();
 }
+
 
