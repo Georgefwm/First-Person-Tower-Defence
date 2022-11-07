@@ -37,7 +37,7 @@ public:
 
 	void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category="Asthetic")
+	UPROPERTY(VisibleAnywhere, Category="Asthetic")
 	TEnumAsByte<EWeaponType> WeaponType;
 
 	UPROPERTY(VisibleAnywhere, Category="Core Logic")
@@ -46,6 +46,10 @@ public:
 	/** Weapon skeletal mesh */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
 	USkeletalMeshComponent* WeaponMesh;
+	
+	/** Empty shell static mesh */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Asthetic")
+	TSubclassOf<AActor> EjectClass;
 
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Acoustic")
@@ -54,6 +58,13 @@ public:
 	/** Sound to play when clip is empy */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Acoustic")
 	USoundBase* EmptySound;
+
+	/** Sound to play when reloading */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Acoustic")
+	USoundBase* ReloadSound;
+
+	UPROPERTY()
+	float VolumeModifier = 0.3;
 	
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asthetic")
@@ -72,10 +83,6 @@ public:
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Asthetic")
 	FVector MuzzleOffset;
-	
-	/** Attaches the actor to a mesh component */
-	// UFUNCTION(BlueprintCallable, Category="Backend")
-	// void AttachToComponent(USkeletalMeshComponent* TargetMesh);
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsActiveWeapon;
@@ -100,9 +107,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
 	float FireRate;
 
-	/** Reload Speed */
+	/** For firing animation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
-	float FireCooldown;
+	float LastFireTime = -100.0;
+
+	UFUNCTION(BlueprintCallable)
+	float GetLastFireTime() { return LastFireTime; }
+
+	/** For reloading animation */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	float LastReloadTime = -100.0;
+
+	UFUNCTION(BlueprintCallable)
+	float GetLastReloadTime() { return LastReloadTime; }
 
 	UFUNCTION(BlueprintCallable)
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }

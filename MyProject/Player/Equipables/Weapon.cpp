@@ -16,12 +16,6 @@ AWeapon::AWeapon()
 
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
-	Damage = 10;
-	ClipSize = 10;
-	Ammo = ClipSize;
-	ReloadSpeed = 1.0;
-	FireRate = 1.0;
 }
 
 void AWeapon::BeginPlay()
@@ -45,9 +39,9 @@ void AWeapon::FireHitScan()
 {
 	if (this->Ammo <= 0)
 	{
-		// TODO: play empty sound
 		if (EmptySound)
-			UGameplayStatics::PlaySound2D(GetWorld(), EmptySound, 1, 1, 0);
+			UGameplayStatics::PlaySound2D(GetWorld(), EmptySound, VolumeModifier, 1, 0);
+		
 		return;
 	}
 
@@ -57,11 +51,10 @@ void AWeapon::FireHitScan()
 	if (OwningPlayer == nullptr)
 		return;
 
-	if (EmptySound)
-		UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 1, 1, 0);
+	if (FireSound)
+		UGameplayStatics::PlaySound2D(GetWorld(), FireSound, VolumeModifier, 1, 0);
+		
 	
-	this->Ammo -= 1;
-
 	FMinimalViewInfo CameraView;
 	OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
 
@@ -79,9 +72,12 @@ void AWeapon::FireHitScan()
 	
 		if (AEnemy* Enemy = Cast<AEnemy>(HitRes.GetActor()))
 		{
-			Enemy->HandleHit(HitRes, this->Damage);
+			Enemy->HandleHit(HitRes, Damage);
 		}
 	}
+	
+	this->Ammo -= 1;
+	LastFireTime = GetWorld()->GetTimeSeconds();
 }
 
 void AWeapon::SecondaryFire()
@@ -95,8 +91,11 @@ void AWeapon::Reload()
 		return;
 	}
 
-	if (ReloadAnimation)
-		WeaponMesh->PlayAnimation(ReloadAnimation, false);
+	// if (ReloadAnimation)
+	// 	WeaponMesh->PlayAnimation(ReloadAnimation, false);
+
+	if (EmptySound)
+		UGameplayStatics::PlaySound2D(GetWorld(), ReloadSound, VolumeModifier, 1, 0);
 	
 	GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeapon::ApplyReload, this->ReloadSpeed, false);
 }
