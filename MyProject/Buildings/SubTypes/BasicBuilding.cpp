@@ -1,7 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BasicBuilding.h"
-
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -13,6 +12,11 @@ ABasicBuilding::ABasicBuilding()
 	BaseModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelMesh"));
 	BaseModel->SetRelativeRotation(this->GetActorRotation());
 	BaseModel->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+
+	TargetingArea = CreateDefaultSubobject<USphereComponent>(TEXT("TargetingCollision"));
+	TargetingArea->SetCollisionProfileName(TEXT("Pawn"));
+	TargetingArea->SetRelativeLocation(FVector(0.0, 0.0, 0.0));
+	TargetingArea->SetVisibility(true);
 	
 	MaxHealthPoints = 1000;
 	CurrentHealthPoints = 1;
