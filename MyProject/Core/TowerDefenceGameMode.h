@@ -14,9 +14,24 @@ class ATowerDefenceGameMode : public AGameMode
 
 public:
 	ATowerDefenceGameMode();
+	~ATowerDefenceGameMode() = default;
 
+	UFUNCTION()
+	void LevelComplete();
 	
+	UFUNCTION()
+	void EndGame();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Information")
+	int RemainingLives;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Information")
+	int MaxLives = 100;
+
+	UFUNCTION(BlueprintCallable)
+	void DecrementLives(int Amount);
+	void IncrementLives(int Amount);
+	
 	/** Current wave (starts at zero) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Game Information")
 	int WaveNumber = 0;
@@ -33,12 +48,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Game Information")
 	AObjective* Objective;
 
-	inline AObjective* GetLevelObjective() { return Objective; };
-	inline void SetLevelObjective(AObjective* Obj) { Objective = Obj; };
-
-protected:
-
-	
+	const AObjective* GetLevelObjective() { return Objective; };
+	void SetLevelObjective(AObjective* Obj) { Objective = Obj; };
 	
 };
 
