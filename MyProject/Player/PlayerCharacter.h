@@ -128,13 +128,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "HUD Elements")
 	int CurrentHealthPoints;
 
-	/** Maximum Resource Amount */
-	UPROPERTY(EditAnywhere, Category = "HUD Elements")
-	int MaxMetal;
-
 	/** Resource Amount */
 	UPROPERTY(EditAnywhere, Category = "HUD Elements")
-	int CurrentMetal;
+	int CurrentMetal = 500;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD Elements")
@@ -159,9 +155,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
 	int GetCurrentClipCount();
-
-	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
-	int GetMaxMetal();
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
 	int GetCurrentMetal();
