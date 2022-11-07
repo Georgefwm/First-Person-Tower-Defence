@@ -7,7 +7,8 @@ ASmgWeapon::ASmgWeapon()
 {
 	WeaponType = EWeaponType::Smg;
 	FireLogic = EFireLogicType::Hitscan;
-	
+
+	Damage = 8;
 	ClipSize = 24;
 	Ammo = ClipSize;
 	ReloadSpeed = 1.0;
@@ -18,7 +19,14 @@ void ASmgWeapon::PrimaryFirePressed()
 {
 	Super::PrimaryFirePressed();
 
+	if (GetWorldTimerManager().IsTimerActive(ReloadTimer))
+	{
+		return;
+	}
+	
+	// For instant first shot
 	AWeapon::FireHitScan();
+	
 	GetWorldTimerManager().SetTimer(FireTimer, this, &AWeapon::FireHitScan, this->FireRate, true);
 }
 
