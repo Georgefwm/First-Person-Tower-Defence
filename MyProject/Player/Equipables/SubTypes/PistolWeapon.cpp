@@ -7,7 +7,8 @@ APistolWeapon::APistolWeapon()
 {
 	WeaponType = EWeaponType::Pistol;
 	FireLogic = EFireLogicType::Hitscan;
-	
+
+	Damage = 10;
 	ClipSize = 12;
 	Ammo = ClipSize;
 	ReloadSpeed = 1.0;
@@ -17,13 +18,15 @@ APistolWeapon::APistolWeapon()
 void APistolWeapon::PrimaryFirePressed()
 {
 	Super::PrimaryFirePressed();
+
+	if (GetWorld()->GetTimeSeconds() - LastFireTime < FireRate)
+		return;
 	
 	AWeapon::FireHitScan();
 }
 
 void APistolWeapon::PrimaryFireReleased()
 {
-	
 }
 
 void APistolWeapon::SecondaryFire()
