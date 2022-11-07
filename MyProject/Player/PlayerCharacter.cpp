@@ -50,7 +50,6 @@ APlayerCharacter::APlayerCharacter()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -95.0f));
 
 	this->CurrentHealthPoints = this->MaxHealthPoints;
-	this->CurrentMetal = this->MaxMetal;
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> PlayerPawnClassFinder(TEXT("/Game/Player/HUD/PlayerHUDBP"));
 	HUDClass = PlayerPawnClassFinder.Class;
@@ -174,11 +173,6 @@ int APlayerCharacter::GetClipSize()
 int APlayerCharacter::GetCurrentClipCount()
 {
 	return this->EquippedWeapon->Ammo;
-}
-
-int APlayerCharacter::GetMaxMetal()
-{
-	return this->MaxMetal;
 }
 
 int APlayerCharacter::GetCurrentMetal()
