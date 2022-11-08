@@ -13,9 +13,12 @@ ABasicBuilding::ABasicBuilding()
 	BaseModel->SetRelativeRotation(this->GetActorRotation());
 	BaseModel->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
+	// TODO: Fix
 	TargetingArea = CreateDefaultSubobject<USphereComponent>(TEXT("TargetingCollision"));
-	TargetingArea->SetCollisionProfileName(TEXT("Pawn"));
-	TargetingArea->SetRelativeLocation(FVector(0.0, 0.0, 0.0));
+	TargetingArea->SetupAttachment(RootComponent);
+	TargetingArea->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	TargetingArea->InitSphereRadius(AttackRange);
+	TargetingArea->SetRelativeLocation(GetSearchPosition());
 	TargetingArea->SetVisibility(true);
 	
 	MaxHealthPoints = 1000;
@@ -35,6 +38,8 @@ FVector ABasicBuilding::GetSearchPosition()
 void ABasicBuilding::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
 
 // Called every frame
@@ -67,23 +72,21 @@ void ABasicBuilding::CheckForNewTarget()
 	Super::CheckForNewTarget();
 
 	AEnemy* NextTarget = nullptr;
-	float ShortestDistance = static_cast<float>(AttackRange); // Set maximum distance that we can attack
-	
-	if (CurrentTarget != nullptr)
-	{
-		NextTarget = CurrentTarget;
-		ShortestDistance = FVector::Dist(GetActorLocation(), CurrentTarget->GetActorLocation());
-	}
-	
+	float ShortestDistance = AttackRange; // Set maximum distance that we can attack (collision sphere radius)
+
+	// TODO: Implement sphere collision detection
 	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Actors);
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Actors);
+	TargetingArea->GetOverlappingActors(Actors, AEnemy::StaticClass());
+	
 	// Always try to attack the closet enemy
-	for (AActor* e : Actors)
+	for (AActor* Actor : Actors)
 	{
-		AEnemy* Enemy = Cast<AEnemy>(e);
-		if (Enemy)
-		{														// 200 should be building gun barrel height (or middle)
-			float Distance = FVector::Dist(GetActorLocation() + GetActorUpVector() * 200, Enemy->GetActorLocation());
+		// Might be redundant check
+		if (AEnemy* Enemy = Cast<AEnemy>(Actor))
+		{
+			float Distance = FVector::Dist(GetSearchPosition(), Enemy->GetActorLocation());
+			
 			if (Distance < ShortestDistance && HasLineOfSight(Enemy))
 			{
 				NextTarget = Enemy;
@@ -91,5 +94,11 @@ void ABasicBuilding::CheckForNewTarget()
 		}
 	}
 	CurrentTarget = NextTarget;
+
+	// Set Building state
+	if (CurrentTarget != nullptr)
+		CurrentBuildingState = BuildingState::Attacking;
+	else
+		CurrentBuildingState = BuildingState::Idle;
 }
 

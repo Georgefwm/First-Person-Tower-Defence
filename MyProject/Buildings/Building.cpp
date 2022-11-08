@@ -20,8 +20,7 @@ ABuilding::ABuilding()
 
 FVector ABuilding::GetSearchPosition()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Warning: ABuilding::GetSearchPosition() virtual function should never be called"));
-	return FVector(0, 0, 0);
+	return FVector(0.0, 0.0, 0.0);
 }
 
 // Called when the game starts or when spawned
@@ -29,21 +28,22 @@ void ABuilding::BeginPlay()
 {
 	Super::BeginPlay();
 
-	LastAttackTime = GetWorld()->GetTimeSeconds();
+	LastAttackTime = GetWorld()->GetTimeSeconds() - 100;
 }
 
 void ABuilding::Build(float DeltaTime)
 {
-	if (this->BuildStatus >= this->BuildTime)
-		this->FinishedBuilding = true;
+	if (BuildStatus >= BuildTime)
+	{
+		CurrentBuildingState = BuildingState::Idle;
+	}
 	
-	CurrentHealthPoints += this->MaxHealthPoints * (DeltaTime / this->BuildTime);
-	this->BuildStatus += DeltaTime;
+	CurrentHealthPoints += MaxHealthPoints * (DeltaTime / BuildTime);
+	BuildStatus += DeltaTime;
 }
 
 void ABuilding::Attack(float DeltaTime)
 {
-	
 }
 
 bool ABuilding::HasLineOfSight(AEnemy* Target)
@@ -86,20 +86,17 @@ void ABuilding::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (FinishedBuilding)
+	switch (CurrentBuildingState)
 	{
-		UpdateTargeting();
-
-		if (CurrentTarget != nullptr)
-		{
-			Attack(DeltaTime);
-		}
+		case (Building):	{ Build(DeltaTime);							} break;
+		case (Idle):		{ CheckForNewTarget();						} break;
+		case (Attacking):	{ CheckForNewTarget(); Attack(DeltaTime);	} break;
+		case (Disabled):	{											} break;  // TODO: implement disabling buildings
+		default: return;
 	}
-	else
-		Build(DeltaTime);
 }
 
-// Called every frame
+
 void ABuilding::UpdateTargeting()
 {
 	CheckForNewTarget();

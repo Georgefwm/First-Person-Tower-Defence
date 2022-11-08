@@ -20,56 +20,73 @@ public:
 	// Adjust the targeting function based on target priority
 	enum TargetPriority : uint8
 	{
-		TP_DIST_LOWEST,
-		TP_DIST_HIGHEST,
-		TP_HP_LOWEST,
-		TP_HP_HIGHEST,
+		LowestDistance,
+		HighestDistance,
+		HighestHp,
+		LowestHp,
+	};
+
+	enum BuildingState : uint8
+	{
+		Building,
+		Idle,
+		Attacking,
+		Disabled
 	};
 
 	/** Stats */
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	int MaxHealthPoints = 1000;
+	int MaxHealthPoints;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	double AttackRange = 5000;
+	float AttackRange;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	double AttackDamage = 5;
+	int AttackDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	double AttackSpeed = 1;
+	float AttackSpeed;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	float BuildTime = 5;
+	float BuildTime;
 
 	
 	/** Runtime vars */
 
+	// Holds reference to the player who built the building
 	UPROPERTY()
 	APlayerCharacter* BuildingOwner;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	float BuildStatus = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	bool FinishedBuilding = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
-	AEnemy* CurrentTarget = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
-	uint8 CurrentTargetPriority = TP_DIST_LOWEST;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	float LastAttackTime;
-
+	// Tracks HP
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int CurrentHealthPoints = 1;
 
-	UPROPERTY()
-	UShapeComponent* TargetingArea;
+	// Tracks progress of build state
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	float BuildStatus = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
+	AEnemy* CurrentTarget = nullptr;
 
+	// Decide how the building should target available enemies
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
+	uint8 CurrentTargetPriority = TargetPriority::LowestDistance;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
+	uint8 CurrentBuildingState = BuildingState::Building;
+
+	UFUNCTION(BlueprintCallable)
+	uint8 GetCurrentBuildingState() { return CurrentBuildingState; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	float LastAttackTime;
+	
+	// Produces references for target candidates
+	UPROPERTY()
+	USphereComponent* TargetingArea;
+
+	// Returns the position that the building attacks from
 	UFUNCTION()
 	virtual FVector GetSearchPosition();
 
