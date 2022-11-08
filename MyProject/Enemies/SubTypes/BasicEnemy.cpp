@@ -16,7 +16,8 @@ ABasicEnemy::ABasicEnemy()
 	MeshComponent->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
 	MeshComponent->SetRelativeScale3D(FVector(0.8925, 0.8925, 0.8925));
 
-	this->HealthPoints = 100;
+	HealthPoints = 100;
+	GoldValue = 20;
 }
 
 // Called when the game starts or when spawned

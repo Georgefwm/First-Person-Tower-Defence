@@ -105,12 +105,11 @@ void ABuildTool::PrimaryFirePressed()
 {
 	if (!MenuOpen && this->IsActiveWeapon)
 	{
-		APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
-		if (OwningPlayer == nullptr)
+		if (WeaponOwner == nullptr)
 			return;
 
 		FMinimalViewInfo CameraView;
-		OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+		WeaponOwner->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
 		
 		// Clamp Y axis rotation so the player can't spawn buildings directly above/below them
 		UE::Math::TVector<double> ClampedCameraRotation = CameraView.Rotation.Vector();
@@ -153,6 +152,11 @@ void ABuildTool::PrimaryFirePressed()
 			FRotator Rotation = { 0, DesiredYaw, 0 };
 
 			ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
+			if (NewBuilding)
+			{
+				NewBuilding->SetBuildingOwner(WeaponOwner);
+			}
+			
 		}
 
 	}

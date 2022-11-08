@@ -46,17 +46,15 @@ void AWeapon::FireHitScan()
 	}
 
 	GetWorldTimerManager().ClearTimer(ReloadTimer);
-	
-	APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner());
-	if (OwningPlayer == nullptr)
+
+	if (WeaponOwner == nullptr)
 		return;
 
 	if (FireSound)
 		UGameplayStatics::PlaySound2D(GetWorld(), FireSound, VolumeModifier, 1, 0);
-		
 	
 	FMinimalViewInfo CameraView;
-	OwningPlayer->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+	WeaponOwner->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
 
 	FHitResult HitRes;
 	FCollisionQueryParams TraceParams;
@@ -72,7 +70,7 @@ void AWeapon::FireHitScan()
 	
 		if (AEnemy* Enemy = Cast<AEnemy>(HitRes.GetActor()))
 		{
-			Enemy->HandleHit(HitRes, Damage);
+			Enemy->HandleHit(HitRes, Damage, WeaponOwner);
 		}
 	}
 	

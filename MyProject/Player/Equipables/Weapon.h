@@ -66,13 +66,6 @@ public:
 	UPROPERTY()
 	float VolumeModifier = 0.3;
 	
-	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asthetic")
-	UAnimationAsset* FireAnimation;
-
-	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Asthetic")
-	UAnimationAsset* ReloadAnimation;
 
 	UPROPERTY()
 	FTimerHandle ReloadTimer;
@@ -117,6 +110,15 @@ public:
 	/** For reloading animation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
 	float LastReloadTime = -100.0;
+
+	UPROPERTY()
+	APlayerCharacter* WeaponOwner;
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponOwner(APlayerCharacter* Player) { this->WeaponOwner = Player; }
+
+	UFUNCTION(BlueprintCallable)
+	APlayerCharacter* GetWeaponOwner(APlayerCharacter* Player) { return this->WeaponOwner; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetLastReloadTime() { return LastReloadTime; }

@@ -25,31 +25,30 @@ public:
 		TP_HP_LOWEST,
 		TP_HP_HIGHEST,
 	};
+
+	/** Stats */
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int MaxHealthPoints = 1000;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	int CurrentHealthPoints = 1;
+	double AttackRange = 5000;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	double AttackRange = 10000;
-
-	UPROPERTY()
-	UShapeComponent* TargetingArea;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	double AttackDamage = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	double AttackSpeed = 1;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	float LastAttackTime;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float BuildTime = 5;
 
+	
+	/** Runtime vars */
+
+	UPROPERTY()
+	APlayerCharacter* BuildingOwner;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float BuildStatus = 0;
 
@@ -61,6 +60,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	uint8 CurrentTargetPriority = TP_DIST_LOWEST;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	float LastAttackTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	int CurrentHealthPoints = 1;
+
+	UPROPERTY()
+	UShapeComponent* TargetingArea;
 
 	UFUNCTION()
 	virtual FVector GetSearchPosition();
@@ -75,14 +83,21 @@ protected:
 	UFUNCTION()
 	virtual void Attack(float DeltaTime);
 
+	UFUNCTION()
 	bool HasLineOfSight(AEnemy* Target);
 
+	UFUNCTION()
 	virtual void CheckForNewTarget();
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
 	void UpdateTargeting();
+
+	UFUNCTION()
+	void SetBuildingOwner(APlayerCharacter* Builder);
 
 	// TODO: Implement better target priority system (closest, furthest, highest hp, etc)
 };

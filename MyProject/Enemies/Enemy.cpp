@@ -33,7 +33,7 @@ void AEnemy::Tick(float DeltaTime)
 
 }
 
-void AEnemy::HandleHit(FHitResult Hit, int Damage)
+void AEnemy::HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter)
 {
 	int FinalDamage = Damage;
 	
@@ -51,14 +51,20 @@ void AEnemy::HandleHit(FHitResult Hit, int Damage)
 		// TODO: Play distinct headshot sound
 	}
 	
-	DecrementHealth(FinalDamage);
+	DecrementHealth(FinalDamage, Shooter);
 }
 
 // Handles healing and damage
-void AEnemy::DecrementHealth(int Damage)
+void AEnemy::DecrementHealth(int Damage, APlayerCharacter* Shooter)
 {
 	if (HealthPoints - Damage <= 0)
 	{
+		if (!IsDead)
+		{
+			Shooter->IncrementGold(GoldValue);
+			IsDead = true;
+		}
+		
 		Destroy();
 	}
 

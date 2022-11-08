@@ -77,6 +77,7 @@ void APlayerCharacter::BeginPlay()
 		EquippedWeapon = GetWorld()->SpawnActor<AWeapon>(PrimaryWeaponClass, SpawnParams);
 		if (EquippedWeapon)
 		{
+			EquippedWeapon->SetWeaponOwner(this);
 			PreviousWeapon = EquippedWeapon;
 			EquippedWeapon->OnEquip();
 			Weapons.Add(EquippedWeapon);
@@ -87,6 +88,7 @@ void APlayerCharacter::BeginPlay()
 		
 		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(SecondaryWeaponClass, SpawnParams))
 		{
+			Weapon->SetWeaponOwner(this);
 			Weapon->OnUnEquip();
 			Weapons.Add(Weapon);
 
@@ -96,6 +98,7 @@ void APlayerCharacter::BeginPlay()
 		
 		if (AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(BuildToolClass, SpawnParams))
 		{
+			Weapon->SetWeaponOwner(this);
 			Weapon->OnUnEquip();
 			Weapons.Add(Weapon);
 
@@ -147,6 +150,16 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 
 //////////////////////////////////////////////////////////////////////////// HUD-Player
 
+void APlayerCharacter::IncrementGold(int Amount)
+{
+	Gold += Amount;
+}
+
+void APlayerCharacter::DecrementGold(int Amount)
+{
+	Gold -= Amount;
+}
+
 void APlayerCharacter::UpdateHealthPoints(int Mod)
 {
 	this->CurrentHealthPoints += Mod;
@@ -175,9 +188,9 @@ int APlayerCharacter::GetCurrentClipCount()
 	return this->EquippedWeapon->Ammo;
 }
 
-int APlayerCharacter::GetCurrentMetal()
+int APlayerCharacter::GetCurrentGold()
 {
-	return this->CurrentMetal;
+	return this->Gold;
 }
 
 //////////////////////////////////////////////////////////////////////////// Weapons

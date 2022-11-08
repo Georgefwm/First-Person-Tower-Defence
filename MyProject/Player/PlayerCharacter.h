@@ -130,7 +130,10 @@ private:
 
 	/** Resource Amount */
 	UPROPERTY(EditAnywhere, Category = "HUD Elements")
-	int CurrentMetal = 500;
+	int Gold = 500;
+
+	
+	
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD Elements")
@@ -157,7 +160,13 @@ public:
 	int GetCurrentClipCount();
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD Elements")
-	int GetCurrentMetal();
+	int GetCurrentGold();
+
+	UFUNCTION(BlueprintCallable)
+	void IncrementGold(int Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void DecrementGold(int Amount);
 	
 //////////////////////////////////////////////////////////////////
 	

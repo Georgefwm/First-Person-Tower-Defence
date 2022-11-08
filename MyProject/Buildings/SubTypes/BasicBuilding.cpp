@@ -57,7 +57,7 @@ void ABasicBuilding::Attack(float DeltaTime)
 	
 	if (CurrentTime - LastAttackTime > AttackSpeed)
 	{
-		CurrentTarget->DecrementHealth(AttackDamage);
+		CurrentTarget->DecrementHealth(AttackDamage, BuildingOwner);
 		LastAttackTime = GetWorld()->GetTimeSeconds();
 	}
 }

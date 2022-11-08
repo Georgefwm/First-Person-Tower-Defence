@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <GameFramework/Character.h>
 
 #include "CoreMinimal.h"
 #include "../Core/TowerDefenceGameMode.h"
 #include "GameFramework/Actor.h"
 #include "MyProject/HeadshotText.h"
+#include "MyProject/Player/PlayerCharacter.h"
 #include "Enemy.generated.h"
 
 
@@ -21,7 +23,6 @@ public:
 	AEnemy();
 
 protected:
-	
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -44,6 +45,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	AActor* Target;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
+	int GoldValue;
+
+	UPROPERTY()
+	bool IsDead = false;
+
 	UPROPERTY(BlueprintReadOnly, Category="Combat text")
 	TSubclassOf<AHeadshotText> HeadshotTextClass;
 
@@ -58,13 +65,13 @@ public:
 	void OnHPUpdate();
 
 	UFUNCTION()
-	void HandleHit(FHitResult Hit, int Damage);
+	void HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter);
 
 	UFUNCTION()
 	void IncrementHealth(int Healing);
 
 	UFUNCTION()
-	void DecrementHealth(int Damage);
+	void DecrementHealth(int Damage, APlayerCharacter* Shooter);
 
 	UFUNCTION(BlueprintCallable)
 	int GetHP() { return this->HealthPoints; }

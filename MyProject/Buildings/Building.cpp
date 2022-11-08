@@ -76,6 +76,11 @@ void ABuilding::CheckForNewTarget()
 {
 }
 
+void ABuilding::SetBuildingOwner(APlayerCharacter* Builder)
+{
+	this->BuildingOwner = Builder;
+}
+
 // Called every frame
 void ABuilding::Tick(float DeltaTime)
 {
