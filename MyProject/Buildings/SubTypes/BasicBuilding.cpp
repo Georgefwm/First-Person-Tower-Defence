@@ -8,25 +8,11 @@ ABasicBuilding::ABasicBuilding()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
-	BaseModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelMesh"));
+
+	BaseModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseModel"));
 	BaseModel->SetRelativeRotation(this->GetActorRotation());
 	BaseModel->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-
-	// TODO: Fix
-	TargetingArea = CreateDefaultSubobject<USphereComponent>(TEXT("TargetingCollision"));
-	TargetingArea->SetupAttachment(RootComponent);
-	TargetingArea->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	TargetingArea->InitSphereRadius(AttackRange);
-	TargetingArea->SetRelativeLocation(GetSearchPosition());
-	TargetingArea->SetVisibility(true);
-	
-	MaxHealthPoints = 1000;
-	CurrentHealthPoints = 1;
-	AttackRange = 1000;
-	AttackDamage = 2;
-	AttackSpeed = 0.1;
-	BuildTime = 0.1;
+	SetRootComponent(BaseModel);
 }
 
 FVector ABasicBuilding::GetSearchPosition()
@@ -38,8 +24,6 @@ FVector ABasicBuilding::GetSearchPosition()
 void ABasicBuilding::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 }
 
 // Called every frame
@@ -73,11 +57,19 @@ void ABasicBuilding::CheckForNewTarget()
 
 	AEnemy* NextTarget = nullptr;
 	float ShortestDistance = AttackRange; // Set maximum distance that we can attack (collision sphere radius)
-
-	// TODO: Implement sphere collision detection
+	
 	TArray<AActor*> Actors;
-	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Actors);
-	TargetingArea->GetOverlappingActors(Actors, AEnemy::StaticClass());
+	// UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Actors);
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+
+	// Get all Enemies in sphere radius
+	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetSearchPosition(), AttackRange, ObjectTypes,
+		AEnemy::StaticClass(), ActorsToIgnore, Actors);
 	
 	// Always try to attack the closet enemy
 	for (AActor* Actor : Actors)

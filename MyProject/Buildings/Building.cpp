@@ -4,7 +4,6 @@
 #include "Building.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "MyProject/Enemies/Enemy.h"
 
 
@@ -13,9 +12,8 @@ ABuilding::ABuilding()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
 
-	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 }
 
 FVector ABuilding::GetSearchPosition()
@@ -91,20 +89,7 @@ void ABuilding::Tick(float DeltaTime)
 		case (Building):	{ Build(DeltaTime);							} break;
 		case (Idle):		{ CheckForNewTarget();						} break;
 		case (Attacking):	{ CheckForNewTarget(); Attack(DeltaTime);	} break;
-		case (Disabled):	{											} break;  // TODO: implement disabling buildings
+		case (Disabled):	{											} break;
 		default: return;
 	}
 }
-
-
-void ABuilding::UpdateTargeting()
-{
-	CheckForNewTarget();
-
-	if (CurrentTarget != nullptr)
-	{
-		DrawDebugLine(GetWorld(), this->GetSearchPosition(), CurrentTarget->GetActorLocation(), FColor(255, 0, 0));
-	}
-	// TODO: Update mesh
-}
-

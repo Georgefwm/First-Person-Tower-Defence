@@ -81,10 +81,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
-	
-	// Produces references for target candidates
-	UPROPERTY()
-	USphereComponent* TargetingArea;
 
 	// Returns the position that the building attacks from
 	UFUNCTION()
@@ -109,10 +105,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION()
-	void UpdateTargeting();
-
+	
 	UFUNCTION()
 	void SetBuildingOwner(APlayerCharacter* Builder);
 
