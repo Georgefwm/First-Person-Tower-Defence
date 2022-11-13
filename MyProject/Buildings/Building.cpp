@@ -29,11 +29,21 @@ void ABuilding::BeginPlay()
 	LastAttackTime = GetWorld()->GetTimeSeconds() - 100;
 }
 
+void ABuilding::CheckBuildingLocation()
+{
+	
+}
+
+void ABuilding::SetBuildingState(EBuildingState State)
+{
+	CurrentBuildingState = State;
+}
+
 void ABuilding::Build(float DeltaTime)
 {
 	if (BuildStatus >= BuildTime)
 	{
-		CurrentBuildingState = BuildingState::Idle;
+		CurrentBuildingState = EBuildingState::BS_Idle;
 	}
 	
 	CurrentHealthPoints += MaxHealthPoints * (DeltaTime / BuildTime);
@@ -86,10 +96,11 @@ void ABuilding::Tick(float DeltaTime)
 
 	switch (CurrentBuildingState)
 	{
-		case (Building):	{ Build(DeltaTime);							} break;
-		case (Idle):		{ CheckForNewTarget();						} break;
-		case (Attacking):	{ CheckForNewTarget(); Attack(DeltaTime);	} break;
-		case (Disabled):	{											} break;
+		case (EBuildingState::BS_Placing):		{ CheckBuildingLocation();					} break;
+		case (EBuildingState::BS_Building):		{ Build(DeltaTime);							} break;
+		case (EBuildingState::BS_Idle):			{ CheckForNewTarget();						} break;
+		case (EBuildingState::BS_Attacking):	{ CheckForNewTarget(); Attack(DeltaTime);	} break;
+		case (EBuildingState::BS_Disabled):		{											} break;
 		default: return;
 	}
 }

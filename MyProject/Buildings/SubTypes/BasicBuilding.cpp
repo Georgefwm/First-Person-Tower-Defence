@@ -59,7 +59,6 @@ void ABasicBuilding::CheckForNewTarget()
 	float ShortestDistance = AttackRange; // Set maximum distance that we can attack (collision sphere radius)
 	
 	TArray<AActor*> Actors;
-	// UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemy::StaticClass(), Actors);
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
@@ -89,8 +88,8 @@ void ABasicBuilding::CheckForNewTarget()
 
 	// Set Building state
 	if (CurrentTarget != nullptr)
-		CurrentBuildingState = BuildingState::Attacking;
+		SetBuildingState(EBuildingState::BS_Attacking);
 	else
-		CurrentBuildingState = BuildingState::Idle;
+		SetBuildingState(EBuildingState::BS_Idle);
 }
 

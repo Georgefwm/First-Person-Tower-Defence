@@ -8,6 +8,26 @@
 #include "MyProject/Enemies/Enemy.h"
 #include "Building.generated.h"
 
+UENUM()
+enum class ETargetPriority : uint8
+{
+	TP_LowestDistance		UMETA(DisplayName="Lowest Distance"),
+	TP_HighestDistance		UMETA(DisplayName="Highest Distance"),
+	TP_HighestHp			UMETA(DisplayName="Highest HP"),
+	TP_LowestHp				UMETA(DisplayName="Lowest HP"),
+};
+
+UENUM()
+enum class EBuildingState : uint8
+{
+	BS_Placing		UMETA(DisplayName="Placing"),
+	BS_Building		UMETA(DisplayName="Building"),
+	BS_Idle			UMETA(DisplayName="Idle"),
+	BS_Attacking	UMETA(DisplayName="Attacking"),
+	BS_Disabled		UMETA(DisplayName="Disabled")
+};
+
+
 UCLASS()
 class MYPROJECT_API ABuilding : public AActor
 {
@@ -16,23 +36,6 @@ class MYPROJECT_API ABuilding : public AActor
 public:
 	// Sets default values for this actor's properties
 	ABuilding();
-
-	// Adjust the targeting function based on target priority
-	enum TargetPriority : uint8
-	{
-		LowestDistance,
-		HighestDistance,
-		HighestHp,
-		LowestHp,
-	};
-
-	enum BuildingState : uint8
-	{
-		Building,
-		Idle,
-		Attacking,
-		Disabled
-	};
 
 	/** Stats */
 	
@@ -58,6 +61,9 @@ public:
 	UPROPERTY()
 	APlayerCharacter* BuildingOwner;
 
+	UPROPERTY()
+	USkeletalMesh* Mesh;
+
 	// Tracks HP
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int CurrentHealthPoints = 1;
@@ -71,13 +77,13 @@ public:
 
 	// Decide how the building should target available enemies
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
-	uint8 CurrentTargetPriority = TargetPriority::LowestDistance;
+	ETargetPriority CurrentTargetPriority = ETargetPriority::TP_LowestDistance;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
-	uint8 CurrentBuildingState = BuildingState::Building;
+	EBuildingState CurrentBuildingState = EBuildingState::BS_Building;
 
 	UFUNCTION(BlueprintCallable)
-	uint8 GetCurrentBuildingState() { return CurrentBuildingState; }
+	EBuildingState GetCurrentBuildingState() { return CurrentBuildingState; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
@@ -86,9 +92,15 @@ public:
 	UFUNCTION()
 	virtual FVector GetSearchPosition();
 
+	UFUNCTION()
+	void SetBuildingState(EBuildingState State);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void CheckBuildingLocation();
 
 	UFUNCTION()
 	virtual void Build(float DeltaTime);
