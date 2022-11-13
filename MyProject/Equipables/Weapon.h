@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../PlayerCharacter.h"
+#include "MyProject/Player/PlayerCharacter.h"
+#include "Engine/DataTable.h"
 #include "GameFramework/Actor.h"
 #include "MyProject/Enemies/Enemy.h"
 #include "Weapon.generated.h"
@@ -66,7 +67,6 @@ public:
 	UPROPERTY()
 	float VolumeModifier = 0.3;
 	
-
 	UPROPERTY()
 	FTimerHandle ReloadTimer;
 
@@ -80,24 +80,27 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool IsActiveWeapon;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	UDataTable* WeaponDataTable;
+
 	/** Damage from 1 hit */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	int Damage;
 	
 	/** Current Ammo */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	UPROPERTY(VisibleAnywhere)
 	int Ammo;
 
 	/** Clip Size */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	int ClipSize;
 
 	/** Reload Speed */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	double ReloadSpeed;
 
 	/** Max Fire Rate */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	float FireRate;
 
 	/** For firing animation */
@@ -128,6 +131,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TEnumAsByte<EWeaponType> GetWeaponType() { return WeaponType; }
+
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
+	FName WeaponName;
+
+	UFUNCTION()
+	void SetupStats(FName RowName);
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")

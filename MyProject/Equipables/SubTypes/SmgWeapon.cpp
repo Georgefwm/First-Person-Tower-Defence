@@ -3,16 +3,16 @@
 
 #include "SmgWeapon.h"
 
+#include "MyProject/Equipables/WeaponStats.h"
+
 ASmgWeapon::ASmgWeapon()
 {
 	WeaponType = EWeaponType::Smg;
 	FireLogic = EFireLogicType::Hitscan;
+	WeaponName = FName(TEXT("smg"));
 
-	Damage = 8;
-	ClipSize = 24;
-	Ammo = ClipSize;
-	ReloadSpeed = 1.0;
-	FireRate = 0.1;
+	// Pull weapon stats from data table
+	SetupStats(WeaponName);
 }
 
 void ASmgWeapon::PrimaryFirePressed()

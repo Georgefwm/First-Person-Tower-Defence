@@ -2,7 +2,8 @@
 
 
 #include "Weapon.h"
-#include "../../MyProjectProjectile.h"
+
+#include "WeaponStats.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -23,6 +24,29 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 
 	SetActorHiddenInGame(false);
+}
+
+void AWeapon::SetupStats(FName RowName)
+{
+	if (WeaponDataTable == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Data table not set for weapon"));	
+		return;
+	}	
+	
+	if (FWeaponStats* OutRow = WeaponDataTable->FindRow<FWeaponStats>(RowName, "WeaponStats", true))
+	{
+		Damage = OutRow->Damage;
+		ClipSize = OutRow->ClipSize;
+		ReloadSpeed = OutRow->ReloadSpeed;
+		FireRate = OutRow->FireRate;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to read weapon data table"));
+		return;
+	}
+	Ammo = ClipSize;
 }
 
 void AWeapon::PrimaryFirePressed()

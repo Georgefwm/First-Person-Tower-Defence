@@ -3,16 +3,16 @@
 
 #include "PistolWeapon.h"
 
+#include "MyProject/Equipables/WeaponStats.h"
+
 APistolWeapon::APistolWeapon()
 {
 	WeaponType = EWeaponType::Pistol;
 	FireLogic = EFireLogicType::Hitscan;
+	WeaponName = FName(TEXT("pistol"));
 
-	Damage = 10;
-	ClipSize = 12;
-	Ammo = ClipSize;
-	ReloadSpeed = 1.0;
-	FireRate = 0.1;
+	// Pull weapon stats from data table
+	SetupStats(WeaponName);
 }
 
 void APistolWeapon::PrimaryFirePressed()
