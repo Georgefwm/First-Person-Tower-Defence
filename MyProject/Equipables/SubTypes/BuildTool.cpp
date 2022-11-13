@@ -8,9 +8,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Materials/MaterialExpressionChannelMaskParameter.h"
+#include "Toolkits/IToolkit.h"
 
 
 // Sets default values
@@ -29,7 +28,7 @@ ABuildTool::ABuildTool()
 	
 	if (BuildToolMenuWidget != nullptr)
 	{
-		FVector2d MenuSize = { 200, 200 };
+		FVector2d MenuSize = { 600, 400 };
 		BuildToolMenuWidget->SetDesiredSizeInViewport(MenuSize);
 		MenuOpen = false;
 	}
@@ -88,6 +87,66 @@ void ABuildTool::CloseBuildMenu()
 	}
 }
 
+FVector ABuildTool::GetBuildLocation()
+{
+	if (WeaponOwner == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+			TEXT("Build tool does not have an owner"));
+	
+		return FVector(0.0, 0.0, 0.0);
+	}
+
+	FMinimalViewInfo CameraView;
+	WeaponOwner->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+	
+	// Clamp Y axis rotation so the player can't spawn buildings directly above/below them
+	UE::Math::TVector<double> ClampedCameraRotation = CameraView.Rotation.Vector();
+	ClampedCameraRotation.Z = UE::Geometry::VectorUtil::Clamp(ClampedCameraRotation.Z, -0.5, 0.5);
+	FVector CameraViewFlatForwardVector = CameraView.Location + ClampedCameraRotation;
+
+	double ForwardBuildDistance = 150;
+
+	// EW! Maths
+	// Calculate the distance that the building should spawn regardless of the camera pitch
+	double PitchInRadians = UKismetMathLibrary::DegreesToRadians(CameraView.Rotation.Pitch);
+	double ClampedPitchInRadians = UE::Geometry::VectorUtil::Clamp(PitchInRadians, -45.0, 45.0);
+	float DesiredDistance = ForwardBuildDistance / UKismetMathLibrary::Cos(ClampedPitchInRadians);
+
+	FVector Location = CameraView.Location + ClampedCameraRotation * DesiredDistance;
+	FVector Down = { 0.0, 0.0, -1.0 };
+
+	FVector From = Location;
+	FVector To = Location + Down * 250;
+
+	//DrawDebugLine(GetWorld(), CameraViewFlatForwardVector, From, FColor(255, 0, 0), true, -1);
+
+	FHitResult HitRes;
+	
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+	
+	if (GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams))
+	{
+		// DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), true, -1);
+		// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
+		// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
+	
+		return HitRes.ImpactPoint;
+	}
+
+	return FVector(0.0, 0.0, 0.0);
+}
+
+FRotator ABuildTool::GetBuildRotation()
+{
+	FRotator Rotation = { 0, WeaponOwner->GetActorForwardVector().ToOrientationRotator().Yaw, 0 };
+	double Change = (static_cast<int>(Rotation.Yaw) + BuildRotationOffset) % 360;
+	Rotation.Yaw = Change;
+	
+	return Rotation;
+}
+
 // Called when the game starts or when spawned
 void ABuildTool::BeginPlay()
 {
@@ -105,66 +164,28 @@ void ABuildTool::PrimaryFirePressed()
 {
 	if (!MenuOpen && this->IsActiveWeapon)
 	{
-		if (WeaponOwner == nullptr)
-			return;
-
-		FMinimalViewInfo CameraView;
-		WeaponOwner->CalcCamera(GetWorld()->DeltaTimeSeconds, CameraView);
+		FVector Location = GetBuildLocation();
+		FRotator Rotation = GetBuildRotation();
 		
-		// Clamp Y axis rotation so the player can't spawn buildings directly above/below them
-		UE::Math::TVector<double> ClampedCameraRotation = CameraView.Rotation.Vector();
-		ClampedCameraRotation.Z = UE::Geometry::VectorUtil::Clamp(ClampedCameraRotation.Z, -0.5, 0.5);
-		FVector CameraViewFlatForwardVector = CameraView.Location + ClampedCameraRotation;
-
-		double ForwardBuildDistance = 150;
-
-		// EW. Maths
-		// Calculate the distance that the building should spawn regardless of the camera pitch
-		double PitchInRadians = UKismetMathLibrary::DegreesToRadians(CameraView.Rotation.Pitch);
-		double ClampedPitchInRadians = UE::Geometry::VectorUtil::Clamp(PitchInRadians, -45.0, 45.0);
-		float DesiredDistance = ForwardBuildDistance / UKismetMathLibrary::Cos(ClampedPitchInRadians);
-
-		FVector Location = CameraView.Location + ClampedCameraRotation * DesiredDistance;
-		FVector Down = { 0.0, 0.0, -1.0 };
-
-		FVector From = Location;
-		FVector To = Location + Down * 250;
-
-		//DrawDebugLine(GetWorld(), CameraViewFlatForwardVector, From, FColor(255, 0, 0), true, -1);
-
-		FHitResult HitRes;
-		
-		FCollisionQueryParams TraceParams;
-		TraceParams.AddIgnoredActor(this);
-		
-		if (GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams))
+		if (Location == FVector(0.0, 0.0, 0.0))
 		{
-			// DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), true, -1);
-			// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
-			// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
-		
-			//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, HitRes.GetActor()->GetActorNameOrLabel());
-		
-			Location = HitRes.ImpactPoint;
-		
-			// We only want the building to face the direction the player is facing (for now)
-			double DesiredYaw = GetActorForwardVector().ToOrientationRotator().Yaw;
-			FRotator Rotation = { 0, DesiredYaw, 0 };
-
-			ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
-			if (NewBuilding)
-			{
-				NewBuilding->SetBuildingOwner(WeaponOwner);
-			}
-			
+			return;
 		}
 
+		ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
+		if (NewBuilding)
+		{
+			NewBuilding->SetBuildingOwner(WeaponOwner);
+			NewBuilding->SetBuildingState(EBuildingState::BS_Placing);
+		}
 	}
 }
 
+// Adds a rotation offset to the build location
 void ABuildTool::SecondaryFire()
 {
-	
+	int Change = (BuildRotationOffset + 90) % 360;
+	BuildRotationOffset = Change;
 }
 
 void ABuildTool::Reload()
@@ -179,11 +200,15 @@ void ABuildTool::Reload()
 void ABuildTool::OnEquip()
 {
 	Super::OnEquip();
+
+	BuildRotationOffset = 0;
 }
 
 void ABuildTool::OnUnEquip()
 {
 	Super::OnUnEquip();
+	
+	BuildRotationOffset = 0;
 	
 	if (MenuOpen)
 	{

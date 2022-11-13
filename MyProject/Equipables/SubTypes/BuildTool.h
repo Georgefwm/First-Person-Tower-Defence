@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MyProject/Buildings/Building.h"
-#include "MyProject/Player/Equipables/Weapon.h"
+#include "MyProject/Equipables/Weapon.h"
 #include "BuildTool.generated.h"
 
 UCLASS()
@@ -26,6 +26,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<TSubclassOf<ABuilding>> Buildings;
+	
+	UPROPERTY()
+	int BuildRotationOffset = 0;
 
 	UPROPERTY(VisibleAnywhere)
 	int SelectedBuildingIndex;
@@ -38,6 +41,12 @@ public:
 
 	UFUNCTION()
 	void CloseBuildMenu();
+
+	UFUNCTION()
+	FVector GetBuildLocation();
+
+	UFUNCTION()
+	FRotator GetBuildRotation();
 
 	UFUNCTION(BlueprintCallable)
 	void SetSelectedBuilding(int Index);
