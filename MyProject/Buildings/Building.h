@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "MyProject/Enemies/Enemy.h"
@@ -61,8 +62,31 @@ public:
 	UPROPERTY()
 	APlayerCharacter* BuildingOwner;
 
-	UPROPERTY()
-	USkeletalMesh* Mesh;
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* CollisionComponent;
+
+	// Mesh
+	
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* TurretBaseMeshComponent;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* TurretGunMeshComponent;
+
+	// Material
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Placement")
+	UMaterialInterface* ValidPlacementMaterial;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Placement")
+	UMaterialInterface* InvalidPlacementMaterial;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mats")
+	UMaterialInterface* TurretBaseMaterial;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Mats")
+	UMaterialInterface* TurretGunMaterial;
+	
 
 	// Tracks HP
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
@@ -74,6 +98,8 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	AEnemy* CurrentTarget = nullptr;
+
+	
 
 	// Decide how the building should target available enemies
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
@@ -88,6 +114,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
 
+	
+
+	UPROPERTY()
+	TArray<UMaterial*> OriginalMats;
+
 	// Returns the position that the building attacks from
 	UFUNCTION()
 	virtual FVector GetSearchPosition();
@@ -100,7 +131,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void CheckBuildingLocation();
+	void UpdatePreview();
 
 	UFUNCTION()
 	virtual void Build(float DeltaTime);
@@ -117,9 +148,18 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	bool IsValidBuildingLocation();
+
+	void UpdatePlacementPosition(FVector Location, FRotator Rotation);
+
+	UFUNCTION()
+	void DestroyBuilding();
 	
 	UFUNCTION()
 	void SetBuildingOwner(APlayerCharacter* Builder);
 
 	// TODO: Implement better target priority system (closest, furthest, highest hp, etc)
+	
 };

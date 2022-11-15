@@ -34,7 +34,13 @@ public:
 	int SelectedBuildingIndex;
 
 	UPROPERTY()
+	ABuilding* BuildingBeingPlaced;
+
+	UPROPERTY()
 	bool MenuOpen = false;
+
+	UPROPERTY()
+	bool CurrentlyPlacing = false;
 
 	UFUNCTION()
 	void OpenBuildMenu();

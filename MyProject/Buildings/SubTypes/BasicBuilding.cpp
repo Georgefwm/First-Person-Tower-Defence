@@ -9,15 +9,13 @@ ABasicBuilding::ABasicBuilding()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	BaseModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseModel"));
-	BaseModel->SetRelativeRotation(this->GetActorRotation());
-	BaseModel->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	
 	SetRootComponent(BaseModel);
 }
 
 FVector ABasicBuilding::GetSearchPosition()
 {
-	return this->GetActorLocation() + this->GetActorUpVector() * 200;
+	return GetActorLocation() + GetActorUpVector() * 100;
 }
 
 // Called when the game starts or when spawned
@@ -53,7 +51,6 @@ void ABasicBuilding::Attack(float DeltaTime)
 
 void ABasicBuilding::CheckForNewTarget()
 {
-	Super::CheckForNewTarget();
 
 	AEnemy* NextTarget = nullptr;
 	float ShortestDistance = AttackRange; // Set maximum distance that we can attack (collision sphere radius)
@@ -81,6 +78,7 @@ void ABasicBuilding::CheckForNewTarget()
 			if (Distance < ShortestDistance && HasLineOfSight(Enemy))
 			{
 				NextTarget = Enemy;
+				ShortestDistance = Distance;
 			}
 		}
 	}

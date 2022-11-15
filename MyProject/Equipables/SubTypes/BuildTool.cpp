@@ -4,12 +4,12 @@
 #include "BuildTool.h"
 
 #include "VectorUtil.h"
+#include "AI/NavigationSystemBase.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Toolkits/IToolkit.h"
 
 
 // Sets default values
@@ -33,6 +33,8 @@ ABuildTool::ABuildTool()
 		MenuOpen = false;
 	}
 
+	CurrentlyPlacing = false;
+
 	static ConstructorHelpers::FClassFinder<ABuilding> BuildingClassFinder(TEXT("/Game/Buildings/BasicBuilding/BasicBuildingBP"));
 	Buildings.Add(BuildingClassFinder.Class);
 
@@ -54,7 +56,9 @@ void ABuildTool::OpenBuildMenu()
 			OwningPlayer->GetLocalViewingPlayerController()->bEnableClickEvents = true;
 			OwningPlayer->GetLocalViewingPlayerController()->ClientIgnoreLookInput(true);
 			
+			BuildToolMenuWidget->bIsFocusable = false;
 			BuildToolMenuWidget->AddToViewport();
+			
 			MenuOpen = true;
 		}
 		
@@ -126,13 +130,21 @@ FVector ABuildTool::GetBuildLocation()
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this);
 	
+	if (CurrentlyPlacing && BuildingBeingPlaced)
+	{
+		TraceParams.AddIgnoredActor(BuildingBeingPlaced);
+	}
+		
+	// TODO: Ignore Enemies
+	
 	if (GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams))
 	{
 		// DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0), true, -1);
 		// DrawDebugBox(GetWorld(), HitRes.ImpactPoint, FVector(5, 5, 5), FColor::Emerald, true, -1);
 		// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0), true, 1);
-	
-		return HitRes.ImpactPoint;
+
+		FVector HitLocation = FVector(HitRes.ImpactPoint.X, HitRes.ImpactPoint.Y, HitRes.ImpactPoint.Z);
+		return HitLocation;
 	}
 
 	return FVector(0.0, 0.0, 0.0);
@@ -158,25 +170,31 @@ void ABuildTool::BeginPlay()
 void ABuildTool::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (CurrentlyPlacing)
+	{
+		if (BuildingBeingPlaced == nullptr)
+			return;
+
+		FVector Location = GetBuildLocation();
+		FRotator Rotation = GetBuildRotation();
+		
+		BuildingBeingPlaced->UpdatePlacementPosition(Location, Rotation);
+	}
 }
 
 void ABuildTool::PrimaryFirePressed()
 {
-	if (!MenuOpen && this->IsActiveWeapon)
+	if (CurrentlyPlacing)
 	{
-		FVector Location = GetBuildLocation();
-		FRotator Rotation = GetBuildRotation();
-		
-		if (Location == FVector(0.0, 0.0, 0.0))
-		{
+		if (BuildingBeingPlaced == nullptr)
 			return;
-		}
 
-		ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
-		if (NewBuilding)
+		if (BuildingBeingPlaced->IsValidBuildingLocation())
 		{
-			NewBuilding->SetBuildingOwner(WeaponOwner);
-			NewBuilding->SetBuildingState(EBuildingState::BS_Placing);
+			CurrentlyPlacing = false;
+			BuildingBeingPlaced->SetBuildingState(EBuildingState::BS_Building);
+			BuildingBeingPlaced = nullptr;
 		}
 	}
 }
@@ -202,6 +220,7 @@ void ABuildTool::OnEquip()
 	Super::OnEquip();
 
 	BuildRotationOffset = 0;
+	CurrentlyPlacing = false;
 }
 
 void ABuildTool::OnUnEquip()
@@ -209,6 +228,16 @@ void ABuildTool::OnUnEquip()
 	Super::OnUnEquip();
 	
 	BuildRotationOffset = 0;
+	
+	if (CurrentlyPlacing)
+	{
+		if (BuildingBeingPlaced)
+		{
+			BuildingBeingPlaced->DestroyBuilding();
+			BuildingBeingPlaced = nullptr;
+		}
+		CurrentlyPlacing = false;
+	}
 	
 	if (MenuOpen)
 	{
@@ -218,9 +247,27 @@ void ABuildTool::OnUnEquip()
 
 void ABuildTool::SetSelectedBuilding(int Index)
 {
+	if (CurrentlyPlacing)
+		OnUnEquip();
+	
 	if (IsValid(Buildings[Index]))
 	{
 		SelectedBuildingIndex = Index;
+
+		FVector Location = GetBuildLocation();
+		FRotator Rotation = GetBuildRotation();
+
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, Location.ToString());
+
+		ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
+		if (NewBuilding)
+		{
+			NewBuilding->SetBuildingOwner(WeaponOwner);
+			BuildingBeingPlaced = NewBuilding;
+		}
+		
+		CurrentlyPlacing = true;
+		CloseBuildMenu();
 	}
 }
 
