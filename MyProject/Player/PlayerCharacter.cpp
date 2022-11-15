@@ -9,7 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
 #include "Components/InputComponent.h"
-#include "Equipables/Weapon.h"
+#include "MyProject/Equipables/Weapon.h"
 #include "GameFramework/InputSettings.h"
 #include "Net/UnrealNetwork.h"
 
