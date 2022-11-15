@@ -13,18 +13,18 @@
 UENUM(BlueprintType)
 enum EWeaponType
 {
-	Shotgun UMETA(Displayname, "Shotgun"),
-	Rifle UMETA(Displayname, "Rifle"),
-	Pistol UMETA(Displayname, "Pistol"),
-	Smg UMETA(Displayname, "SMG"),
-	BuildTool UMETA(Displayname, "Build Tool")
+	Shotgun		UMETA(Displayname, "Shotgun"),
+	Rifle		UMETA(Displayname, "Rifle"),
+	Pistol		UMETA(Displayname, "Pistol"),
+	Smg			UMETA(Displayname, "SMG"),
+	BuildTool	UMETA(Displayname, "Build Tool")
 };
 
 UENUM(BlueprintType)
 enum EFireLogicType
 {
-	Hitscan,
-	Projectile
+	Hitscan		UMETA(Displayname, "Hitscan"),
+	Projectile	UMETA(Displayname, "Projectile")
 };
 
 UCLASS()
