@@ -3,19 +3,22 @@
 
 #include "BasicEnemy.h"
 
+#include "MyProject/ModifierEffects/ModiferComponent.h"
+
 
 // Sets default values
 ABasicEnemy::ABasicEnemy()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 	// Create a mesh component (and position for default SKM_Manny skeleton)
 	USkeletalMeshComponent* MeshComponent = GetMesh();
 	MeshComponent->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	MeshComponent->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
 	MeshComponent->SetRelativeScale3D(FVector(0.8925, 0.8925, 0.8925));
 
+	MoveSpeed = 240;
 	HealthPoints = 100;
 	GoldValue = 20;
 }
