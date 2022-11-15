@@ -4,10 +4,9 @@
 #include "Weapon.h"
 
 #include "WeaponStats.h"
-#include "GameFramework/PlayerController.h"
-#include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "MyProject/ModifierEffects/SubTypes/MoveSlowModifier.h"
 
 
 AWeapon::AWeapon()
@@ -30,7 +29,7 @@ void AWeapon::SetupStats(FName RowName)
 {
 	if (WeaponDataTable == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Data table not set for weapon"));	
+		//UE_LOG(LogTemp, Error, TEXT("Data table not set for weapon"));	
 		return;
 	}	
 	
@@ -95,6 +94,7 @@ void AWeapon::FireHitScan()
 		if (AEnemy* Enemy = Cast<AEnemy>(HitRes.GetActor()))
 		{
 			Enemy->HandleHit(HitRes, Damage, WeaponOwner);
+			Enemy->GiveModifier(AMoveSlowModifier::StaticClass());
 		}
 	}
 	
