@@ -30,6 +30,7 @@ protected:
 	UPROPERTY()
 	UModiferComponent* ModifierComponent;
 
+	// Health cannot go above this (yet)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int MaxHealthPoints = 100;
 	
@@ -45,15 +46,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int AttackDamage;
 
+	// Current target, objective or player
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	AActor* Target;
 
+	// Gold earned by defeating the enemy
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int GoldValue;
 
+	// Used to stop buildings interacting with this Enemy during UEs cleanup process
 	UPROPERTY()
 	bool IsDead = false;
 
+	
 	UPROPERTY(BlueprintReadOnly, Category="Combat text")
 	TSubclassOf<AHeadshotText> HeadshotTextClass;
 
@@ -64,32 +69,42 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Used by hp widget (may be redundant)
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHPUpdate();
 
+	// Executes behaviour related to hit (damage multipliers, logging, etc)
 	UFUNCTION()
 	void HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter);
 
+	// Increase health (heal)
 	UFUNCTION()
 	void IncrementHealth(int Healing);
 
+	// Decrease health (damage)
 	UFUNCTION()
 	void DecrementHealth(int Damage, APlayerCharacter* Shooter);
 
+	// Get current health, used by HUD widgets
 	UFUNCTION(BlueprintCallable)
 	int GetHP() { return this->HealthPoints; }
 
+	// Get max health, used by HUD widgets
 	UFUNCTION(BlueprintCallable)
 	int GetMaxHP() { return this->MaxHealthPoints; }
 
+	// Used to keep record of base move speed, used by movement effecting modifiers
 	UFUNCTION()
 	int GetBaseMoveSpeed() const { return MoveSpeed; };
 
+	// Change real move speed
 	void SetMoveSpeed(float Speed);
 
+	// Returns a list of modifiers currently effecting this Enemy
 	UFUNCTION()
 	void GetModifiers(TArray<AModifier*> Mods);
 
+	// Gives this enemy a modifier
 	UFUNCTION()
 	virtual void GiveModifier(UClass* ModClass);
 };
