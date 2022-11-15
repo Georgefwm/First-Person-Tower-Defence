@@ -6,12 +6,12 @@
 #include <GameFramework/Character.h>
 
 #include "CoreMinimal.h"
-#include "../Core/TowerDefenceGameMode.h"
-#include "GameFramework/Actor.h"
 #include "MyProject/HeadshotText.h"
 #include "MyProject/Player/PlayerCharacter.h"
 #include "Enemy.generated.h"
 
+class UModiferComponent;
+class AModifier;
 
 UCLASS()
 class MYPROJECT_API AEnemy : public ACharacter
@@ -27,6 +27,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY()
+	UModiferComponent* ModifierComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int MaxHealthPoints = 100;
 	
@@ -34,7 +37,7 @@ protected:
 	int HealthPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
-	int Speed;
+	int MoveSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int AttackSpeed;
@@ -78,4 +81,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetMaxHP() { return this->MaxHealthPoints; }
+
+	UFUNCTION()
+	int GetBaseMoveSpeed() const { return MoveSpeed; };
+
+	void SetMoveSpeed(float Speed);
+
+	UFUNCTION()
+	void GetModifiers(TArray<AModifier*> Mods);
+
+	UFUNCTION()
+	virtual void GiveModifier(UClass* ModClass);
 };
