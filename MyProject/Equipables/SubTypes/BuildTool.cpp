@@ -257,7 +257,7 @@ void ABuildTool::SetSelectedBuilding(int Index)
 		FVector Location = GetBuildLocation();
 		FRotator Rotation = GetBuildRotation();
 
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, Location.ToString());
+		
 
 		ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(Buildings[SelectedBuildingIndex], Location, Rotation);
 		if (NewBuilding)
