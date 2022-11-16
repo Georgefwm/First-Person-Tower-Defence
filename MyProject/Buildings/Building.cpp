@@ -24,7 +24,7 @@ ABuilding::ABuilding()
 	CollisionComponent->SetRelativeScale3D(FVector(1/20.0, 1/20.0, 1/20.0));
 	CollisionComponent->InitBoxExtent(FVector(80, 80, BoxHeight));
 	CollisionComponent->SetRelativeLocation(FVector(0, 0, BoxHeight));
-	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
 	TurretGunMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TurretGun"));
 	TurretGunMeshComponent->SetupAttachment(TurretBaseMeshComponent);
@@ -59,10 +59,21 @@ void ABuilding::BeginPlay()
 
 bool ABuilding::IsValidBuildingLocation()
 {
-	TArray<AActor*> OverlappingActors;
-	CollisionComponent->GetOverlappingActors(OverlappingActors);
+	TArray<AActor*> Actors;
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	ActorsToIgnore.Add(BuildingOwner);
 	
-	return OverlappingActors.IsEmpty();
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+	// Get all Enemies in sphere radius
+	UKismetSystemLibrary::BoxOverlapActors(GetWorld(), GetSearchPosition(), CollisionComponent->GetUnscaledBoxExtent(),
+		ObjectTypes, nullptr, ActorsToIgnore, Actors);
+	
+
+	return Actors.IsEmpty();
 }
 
 void ABuilding::UpdatePreview()
@@ -124,6 +135,9 @@ bool ABuilding::HasLineOfSight(AEnemy* Target)
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this);
 	TraceParams.bFindInitialOverlaps = true;
+	TraceParams.AddIgnoredActor(BuildingOwner);
+
+	
 	
 	bool Hit = GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams);
 
