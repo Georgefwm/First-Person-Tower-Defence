@@ -44,6 +44,13 @@ void ABasicBuilding::Attack(float DeltaTime)
 	
 	if (CurrentTime - LastAttackTime > AttackSpeed)
 	{
+		if (!IsValid(CurrentTarget))
+		{
+			CurrentTarget = nullptr;
+			SetBuildingState(EBuildingState::BS_Idle);
+			return;
+		}
+		
 		CurrentTarget->DecrementHealth(AttackDamage, BuildingOwner);
 		LastAttackTime = GetWorld()->GetTimeSeconds();
 	}
@@ -73,6 +80,9 @@ void ABasicBuilding::CheckForNewTarget()
 		// Might be redundant check
 		if (AEnemy* Enemy = Cast<AEnemy>(Actor))
 		{
+			if (!IsValid(Enemy))
+				return;
+			
 			float Distance = FVector::Dist(GetSearchPosition(), Enemy->GetActorLocation());
 			
 			if (Distance < ShortestDistance && HasLineOfSight(Enemy))

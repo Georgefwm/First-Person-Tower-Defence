@@ -143,8 +143,8 @@ bool ABuilding::HasLineOfSight(AEnemy* Target)
 
 	if (Hit)
 	{
-		DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0));
-		DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0));
+		// DrawDebugLine(GetWorld(), From, HitRes.ImpactPoint, FColor(255, 0, 0));
+		// DrawDebugLine(GetWorld(), HitRes.ImpactPoint, To, FColor(255, 255, 0));
 
 		return HitRes.GetActor()->GetName().Equals(Target->GetName());
 	}
