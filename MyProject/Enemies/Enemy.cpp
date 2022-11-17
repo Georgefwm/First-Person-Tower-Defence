@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "MyProject/ModifierEffects/ModiferComponent.h"
 #include "MyProject/ModifierEffects/SubTypes/MoveSlowModifier.h"
 
@@ -14,6 +15,7 @@ AEnemy::AEnemy()
 {
 	ModifierComponent = CreateDefaultSubobject<UModiferComponent>(TEXT("Modifier Component"));
 	
+	GetMesh()->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -30,6 +32,7 @@ void AEnemy::BeginPlay()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	
+	
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
@@ -42,9 +45,14 @@ void AEnemy::Tick(float DeltaTime)
 
 void AEnemy::HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter)
 {
+	if (IsDead)
+	{
+		return;
+	}
+	
 	int FinalDamage = Damage;
 	
-	// UE_LOG(LogTemp, Warning, TEXT("Damage: %d"), FinalDamage);
+	
 	
 	const FString BoneName = Hit.BoneName.ToString();
 	if (BoneName == FString("Bip001-Head"))
@@ -58,26 +66,29 @@ void AEnemy::HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter)
 		// TODO: Play distinct headshot sound
 	}
 	
-	GiveModifier(AMoveSlowModifier::StaticClass());
-	DecrementHealth(FinalDamage, Shooter);
+	LastDamageDealer = Shooter;
+	DecrementHealth(FinalDamage);
 }
 
 // Handles healing and damage
-void AEnemy::DecrementHealth(int Damage, APlayerCharacter* Shooter)
+void AEnemy::DecrementHealth(int Damage)
 {
 	if (HealthPoints - Damage <= 0)
 	{
 		if (!IsDead)
 		{
-			Shooter->IncrementGold(GoldValue);
 			IsDead = true;
+
+			// Dead now, so no modifiers should be applied
+			ModifierComponent->AcceptingModifiers = false;
+
+			Die();
 		}
-		
-		Destroy();
 	}
 
 	HealthPoints -= Damage;
 
+	// Redundant?
 	OnHPUpdate();
 }
 
@@ -107,6 +118,31 @@ void AEnemy::GiveModifier(UClass* ModClass)
 	ModifierComponent->ApplyModifier(ModClass);
 }
 
+void AEnemy::Die()
+{
+	if (LastDamageDealer != nullptr)
+		LastDamageDealer->IncrementGold(GoldValue);
+
+	USkeletalMeshComponent* ModelMesh = GetMesh();
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+
+	Capsule->SetCollisionProfileName(TEXT("Ragdoll"));
+	ModelMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+
+	Capsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Ignore);
+	ModelMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Ignore);
+
+	ModelMesh->SetSimulatePhysics(true);
+	ModelMesh->AddImpulse(GetVelocity());
+
+	// Any things that need updating in BP. e.g. Health bar widget removal
+	OnDieBp();
+	
+	GetCharacterMovement()->DisableMovement();
+
+	SetLifeSpan(2);
+}
+
 // Handles healing and damage
 void AEnemy::IncrementHealth(int Healing)
 {
@@ -120,5 +156,4 @@ void AEnemy::IncrementHealth(int Healing)
 	
 	OnHPUpdate();
 }
-
 

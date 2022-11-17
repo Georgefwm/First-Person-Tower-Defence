@@ -30,6 +30,8 @@ protected:
 	UPROPERTY()
 	UModiferComponent* ModifierComponent;
 
+	
+
 	// Health cannot go above this (yet)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int MaxHealthPoints = 100;
@@ -50,6 +52,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	AActor* Target;
 
+	
+
 	// Gold earned by defeating the enemy
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int GoldValue;
@@ -65,7 +69,10 @@ protected:
 	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Combat text")
 	// TSubclassOf<AHeadshotText> DamageNumberTextClass;
 
-public:	
+public:
+	UPROPERTY()
+	APlayerCharacter* LastDamageDealer;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -77,13 +84,16 @@ public:
 	UFUNCTION()
 	void HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDieBp();
+
 	// Increase health (heal)
 	UFUNCTION()
 	void IncrementHealth(int Healing);
 
 	// Decrease health (damage)
 	UFUNCTION()
-	void DecrementHealth(int Damage, APlayerCharacter* Shooter);
+	void DecrementHealth(int Damage);
 
 	// Get current health, used by HUD widgets
 	UFUNCTION(BlueprintCallable)
@@ -107,4 +117,10 @@ public:
 	// Gives this enemy a modifier
 	UFUNCTION()
 	virtual void GiveModifier(UClass* ModClass);
+	
+	UFUNCTION()
+	void Die();
 };
+
+
+
