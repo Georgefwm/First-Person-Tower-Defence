@@ -81,11 +81,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Placement")
 	UMaterialInterface* InvalidPlacementMaterial;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Mats")
+	UPROPERTY(EditDefaultsOnly, Category = "Material")
 	UMaterialInterface* TurretBaseMaterial;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Mats")
+	UPROPERTY(EditDefaultsOnly, Category = "Material")
 	UMaterialInterface* TurretGunMaterial;
+
+	// Sound
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Sound")
+	USoundBase* FireSound;
 	
 
 	// Tracks HP
