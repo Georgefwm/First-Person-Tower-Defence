@@ -94,7 +94,6 @@ void AWeapon::FireHitScan()
 		if (AEnemy* Enemy = Cast<AEnemy>(HitRes.GetActor()))
 		{
 			Enemy->HandleHit(HitRes, Damage, WeaponOwner);
-			Enemy->GiveModifier(AMoveSlowModifier::StaticClass());
 		}
 	}
 	
