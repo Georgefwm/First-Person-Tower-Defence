@@ -35,8 +35,12 @@ ABuildTool::ABuildTool()
 
 	CurrentlyPlacing = false;
 
+	// TODO: Implement data table for building classes
 	static ConstructorHelpers::FClassFinder<ABuilding> BuildingClassFinder(TEXT("/Game/Buildings/BasicBuilding/BasicBuildingBP"));
 	Buildings.Add(BuildingClassFinder.Class);
+
+	static ConstructorHelpers::FClassFinder<ABuilding> BuildingTwoClassFinder(TEXT("/Game/Buildings/SlowBuilding/SlowBuildingBP"));
+	Buildings.Add(BuildingTwoClassFinder.Class);
 
 	SelectedBuildingIndex = 0;
 }
