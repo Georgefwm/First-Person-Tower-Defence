@@ -24,4 +24,6 @@ class MYPROJECT_API AMoveSlowModifier : public AModifier
 
 	// Used by timer to self-remove modifier
 	virtual void Remove() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

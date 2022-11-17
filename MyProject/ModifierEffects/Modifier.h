@@ -55,15 +55,27 @@ public:
 	UPROPERTY()
 	float Duration;
 
+	// How often a ticking modifer should fire
+	UPROPERTY()
+	float TickRate;
+
 	// Returns description of modifier
 	UFUNCTION()
 	virtual FString GetDescription();
 
-	// Apply modifier to an Enemy
+	/**
+	 * Applies the Modifier to the owning target
+	 *
+	 * The implementation will most likely be extremely specific to each modifier
+	 */
 	UFUNCTION()
 	virtual void Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent);
 
-	// Used by timer to self-remove modifier
+
+	// Used by to destroy a Modifier, clears any active timers
 	UFUNCTION()
 	virtual void Remove();
+
+protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

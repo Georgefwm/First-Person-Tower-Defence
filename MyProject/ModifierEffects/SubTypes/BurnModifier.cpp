@@ -8,7 +8,8 @@
 
 ABurnModifier::ABurnModifier()
 {
-	ModifierValue = 0.1;
+	ModifierValue = 5;  // Burn damage
+	TickRate = 0.3;
 	Duration = 5.0;
 }
 
@@ -20,41 +21,39 @@ FString ABurnModifier::GetDescription()
 
 void ABurnModifier::Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent)
 {
-	if (!ModiferComponent->ActiveModifiers.IsEmpty())
-	{
-		for (int Index = 0; Index < ModiferComponent->ActiveModifiers.Num(); Index++)
-		{
-			if (!ModiferComponent->ActiveModifiers.IsValidIndex(Index))
-				continue;
-			
-			AModifier* Mod = ModiferComponent->ActiveModifiers[Index];
-			
-			if (Mod->IsA(GetClass()))
-			{
-				GetWorldTimerManager().ClearTimer(Mod->Timer);
-				ModiferComponent->ActiveModifiers.Remove(Mod);
-				Mod->Destroy();
-			}
-		}
-	}
+	Super::Apply(Enemy, ModiferComponent);
+
+	// Remove the modifier if already active on the target
+	if(OwningComponent->IsModifierActive(StaticClass()))
+		OwningComponent->RemoveModifierByClass(StaticClass());
 	
-	Target = Enemy;
-	OwningComponent = ModiferComponent;
-
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, Target->GetActorNameOrLabel());
-
-	Target->SetMoveSpeed(Target->GetBaseMoveSpeed() * ModifierValue);
-
-	GetWorldTimerManager().SetTimer(Timer, this, &ABurnModifier::Remove, Duration, true);
-
+	
+	// Set burn repeating timer
+	GetWorldTimerManager().SetTimer(Timer, this, &ABurnModifier::BurnTarget, TickRate,
+		true,TickRate);
+	
 	ModiferComponent->ActiveModifiers.Add(this);
+}
+
+void ABurnModifier::BurnTarget()
+{
+	Target->DecrementHealth(ModifierValue);
+}
+
+void ABurnModifier::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetLifeSpan(Duration);
 }
 
 void ABurnModifier::Remove()
 {
-	if (Target && OwningComponent)
-	{
-		OwningComponent->ActiveModifiers.Remove(this);
-	}
+	Super::Remove();
 	Destroy();
+}
+
+void ABurnModifier::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
 }

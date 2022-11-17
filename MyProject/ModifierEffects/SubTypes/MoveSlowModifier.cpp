@@ -20,29 +20,12 @@ FString AMoveSlowModifier::GetDescription()
 
 void AMoveSlowModifier::Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent)
 {
-	if (!ModiferComponent->ActiveModifiers.IsEmpty())
-	{
-		for (int Index = 0; Index < ModiferComponent->ActiveModifiers.Num(); Index++)
-		{
-			if (!ModiferComponent->ActiveModifiers.IsValidIndex(Index))
-				continue;
-			
-			AModifier* Mod = ModiferComponent->ActiveModifiers[Index];
-			
-			if (Mod->IsA(GetClass()))
-			{
-				GetWorldTimerManager().ClearTimer(Mod->Timer);
-				ModiferComponent->ActiveModifiers.Remove(Mod);
-				Mod->Destroy();
-			}
-		}
-	}
+	Super::Apply(Enemy, ModiferComponent);
 	
-	Target = Enemy;
-	OwningComponent = ModiferComponent;
-
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, Target->GetActorNameOrLabel());
-
+	// Remove the modifier if already active on the target
+	if(OwningComponent->IsModifierActive(StaticClass()))
+		OwningComponent->RemoveModifierByClass(StaticClass());
+	
 	Target->SetMoveSpeed(Target->GetBaseMoveSpeed() * ModifierValue);
 
 	GetWorldTimerManager().SetTimer(Timer, this, &AMoveSlowModifier::Remove, Duration, false);
@@ -52,10 +35,18 @@ void AMoveSlowModifier::Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent
 
 void AMoveSlowModifier::Remove()
 {
-	if (Target && OwningComponent)
+	Super::Remove();
+	
+	if (IsValid(Target) && IsValid(OwningComponent))
 	{
 		Target->SetMoveSpeed(Target->GetBaseMoveSpeed());
-		OwningComponent->ActiveModifiers.Remove(this);
+		OwningComponent->RemoveModifier(this);
 	}
-	Destroy();
 }
+
+void AMoveSlowModifier::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
+
+
