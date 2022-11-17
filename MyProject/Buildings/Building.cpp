@@ -23,7 +23,7 @@ ABuilding::ABuilding()
 	float const BoxHeight = 55;
 	CollisionComponent->SetRelativeScale3D(FVector(1/20.0, 1/20.0, 1/20.0));
 	CollisionComponent->InitBoxExtent(FVector(80, 80, BoxHeight));
-	CollisionComponent->SetRelativeLocation(FVector(0, 0, BoxHeight));
+	CollisionComponent->SetRelativeLocation(FVector(0, 0, 2.75));
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
 	TurretGunMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TurretGun"));
