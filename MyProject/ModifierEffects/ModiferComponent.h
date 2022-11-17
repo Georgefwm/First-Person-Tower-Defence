@@ -21,8 +21,29 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TArray<AModifier*> ActiveModifiers;
 
+	UPROPERTY()
+	bool AcceptingModifiers = true;
+
 	UFUNCTION()
 	void GetModifiers(TArray<AModifier*> Modifiers);
+
+	UFUNCTION()
+	void RemoveModifier(AModifier* Mod);
+
+	UFUNCTION()
+	void RemoveModifierByClass(UClass* ModClass);
+
+	UFUNCTION()
+	void RemoveAllModifiers();
+
+	
+
+	/**
+	 * Checks if a modifier is active on the owning actor.
+	 * Can optionally remove the Modifier if found.
+	 */
+	UFUNCTION()
+	bool IsModifierActive(UClass* ModClass);
 
 	UPROPERTY(VisibleAnywhere)
 	AEnemy* OwningEnemy;
