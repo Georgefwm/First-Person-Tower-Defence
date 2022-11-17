@@ -50,8 +50,15 @@ void ABasicBuilding::Attack(float DeltaTime)
 			SetBuildingState(EBuildingState::BS_Idle);
 			return;
 		}
+
+		if (FireSound)
+			UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 0.2, 1, 0);
 		
-		CurrentTarget->DecrementHealth(AttackDamage, BuildingOwner);
+		// Spawn particles...
+		
+		CurrentTarget->LastDamageDealer = BuildingOwner;
+		CurrentTarget->DecrementHealth(AttackDamage);
+		
 		LastAttackTime = GetWorld()->GetTimeSeconds();
 	}
 }
