@@ -27,9 +27,8 @@ void AWeapon::BeginPlay()
 
 void AWeapon::SetupStats(FName RowName)
 {
-	if (WeaponDataTable == nullptr)
+	if (!IsValid(WeaponDataTable))
 	{
-		//UE_LOG(LogTemp, Error, TEXT("Data table not set for weapon"));	
 		return;
 	}	
 	
