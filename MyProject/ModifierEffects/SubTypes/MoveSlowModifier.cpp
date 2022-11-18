@@ -36,12 +36,13 @@ void AMoveSlowModifier::Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent
 void AMoveSlowModifier::Remove()
 {
 	Super::Remove();
-	
+
 	if (IsValid(Target) && IsValid(OwningComponent))
 	{
 		Target->SetMoveSpeed(Target->GetBaseMoveSpeed());
-		OwningComponent->RemoveModifier(this);
 	}
+
+	
 }
 
 void AMoveSlowModifier::EndPlay(const EEndPlayReason::Type EndPlayReason)

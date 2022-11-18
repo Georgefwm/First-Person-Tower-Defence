@@ -19,6 +19,8 @@ void AModifier::Remove()
 	{
 		GetWorldTimerManager().ClearTimer(Timer);
 	}
+
+	SetLifeSpan(1.0f);
 }
 
 void AModifier::EndPlay(const EEndPlayReason::Type EndPlayReason)

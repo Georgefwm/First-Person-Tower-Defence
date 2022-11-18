@@ -21,9 +21,6 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TArray<AModifier*> ActiveModifiers;
 
-	UPROPERTY()
-	bool AcceptingModifiers = true;
-
 	UFUNCTION()
 	void GetModifiers(TArray<AModifier*> Modifiers);
 
@@ -36,7 +33,8 @@ public:
 	UFUNCTION()
 	void RemoveAllModifiers();
 
-	
+	UFUNCTION()
+	void SetModifierImmune(bool Immune);
 
 	/**
 	 * Checks if a modifier is active on the owning actor.
@@ -50,6 +48,9 @@ public:
 
 
 protected:
+	UPROPERTY(VisibleAnywhere)
+	bool ModifierImmune;
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
 

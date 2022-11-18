@@ -80,7 +80,7 @@ void AEnemy::DecrementHealth(int Damage)
 			IsDead = true;
 
 			// Dead now, so no modifiers should be applied
-			ModifierComponent->AcceptingModifiers = false;
+			ModifierComponent->SetModifierImmune(true);
 
 			Die();
 		}
@@ -122,6 +122,8 @@ void AEnemy::Die()
 {
 	if (LastDamageDealer != nullptr)
 		LastDamageDealer->IncrementGold(GoldValue);
+
+	ModifierComponent->RemoveAllModifiers();
 
 	USkeletalMeshComponent* ModelMesh = GetMesh();
 	UCapsuleComponent* Capsule = GetCapsuleComponent();

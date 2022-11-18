@@ -48,15 +48,21 @@ void UModiferComponent::RemoveModifierByClass(UClass* ModClass)
 void UModiferComponent::RemoveAllModifiers()
 {
 	// Reverse order coz faster?
-	for (int Index = ActiveModifiers.Num(); Index > 0; Index--)
+	for (int Index = ActiveModifiers.Num()-1; Index > 0; Index--)
 	{
 		AModifier* Mod = ActiveModifiers[Index];
 		
 		if (Mod == nullptr)
 			return;
 		
+		ActiveModifiers.Remove(Mod);
 		Mod->Remove();
 	}
+}
+
+void UModiferComponent::SetModifierImmune(bool Immune)
+{
+	ModifierImmune = Immune;
 }
 
 bool UModiferComponent::IsModifierActive(UClass* ModClass)
@@ -68,6 +74,8 @@ bool UModiferComponent::IsModifierActive(UClass* ModClass)
 void UModiferComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetModifierImmune(false);
 }
 
 
@@ -80,7 +88,7 @@ void UModiferComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UModiferComponent::ApplyModifier(UClass* ModClass)
 {
-	if (!AcceptingModifiers)
+	if (ModifierImmune)
 		return;
 	
 	FActorSpawnParameters const SpawnParameters;

@@ -51,17 +51,10 @@ protected:
 	// Current target, objective or player
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	AActor* Target;
-
 	
-
 	// Gold earned by defeating the enemy
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int GoldValue;
-
-	// Used to stop buildings interacting with this Enemy during UEs cleanup process
-	UPROPERTY()
-	bool IsDead = false;
-
 	
 	UPROPERTY(BlueprintReadOnly, Category="Combat text")
 	TSubclassOf<AHeadshotText> HeadshotTextClass;
@@ -72,6 +65,10 @@ protected:
 public:
 	UPROPERTY()
 	APlayerCharacter* LastDamageDealer;
+
+	// Used to stop buildings interacting with this Enemy during UEs cleanup process
+	UPROPERTY()
+	bool IsDead = false;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

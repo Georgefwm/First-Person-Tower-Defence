@@ -50,7 +50,6 @@ void ABurnModifier::BeginPlay()
 void ABurnModifier::Remove()
 {
 	Super::Remove();
-	Destroy();
 }
 
 void ABurnModifier::EndPlay(const EEndPlayReason::Type EndPlayReason)
