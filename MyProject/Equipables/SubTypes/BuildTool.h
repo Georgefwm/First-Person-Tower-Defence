@@ -24,8 +24,11 @@ public:
 	UPROPERTY()
 	UUserWidget* BuildToolMenuWidget;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<ABuilding>> Buildings;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	UDataTable* BuildingDataTable;
 	
 	UPROPERTY()
 	int BuildRotationOffset = 0;

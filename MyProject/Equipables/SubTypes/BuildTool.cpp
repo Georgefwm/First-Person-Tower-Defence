@@ -10,6 +10,7 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MyProject/Buildings/BuildingStats.h"
 
 
 // Sets default values
@@ -35,12 +36,32 @@ ABuildTool::ABuildTool()
 
 	CurrentlyPlacing = false;
 
-	// TODO: Implement data table for building classes
-	static ConstructorHelpers::FClassFinder<ABuilding> BuildingClassFinder(TEXT("/Game/Buildings/BasicBuilding/BasicBuildingBP"));
-	Buildings.Add(BuildingClassFinder.Class);
+	
+	/*if (BuildingDataTable)
+	{
+		for (FName RowName : EnabledBuildings)
+		{
+			FBuildingStats* OutRow = BuildingDataTable->FindRow<FBuildingStats>(RowName, "", true);
 
-	static ConstructorHelpers::FClassFinder<ABuilding> BuildingTwoClassFinder(TEXT("/Game/Buildings/SlowBuilding/SlowBuildingBP"));
-	Buildings.Add(BuildingTwoClassFinder.Class);
+			if (OutRow)
+			{
+				const TCHAR* CPath = *OutRow->PathToBpClass;
+				UE_LOG(LogTemp, Error, TEXT("Path: %s"), CPath);
+
+				static ConstructorHelpers::FClassFinder<ABuilding> BuildingBpFinder(CPath);
+
+				if (BuildingBpFinder.Class)
+					Buildings.Add(BuildingBpFinder.Class);
+			}
+		}
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Data table not valid"));
+	}*/
+	
+	
 
 	SelectedBuildingIndex = 0;
 }
@@ -167,6 +188,8 @@ FRotator ABuildTool::GetBuildRotation()
 void ABuildTool::BeginPlay()
 {
 	Super::BeginPlay();
+
+
 	
 }
 
@@ -251,10 +274,8 @@ void ABuildTool::OnUnEquip()
 
 void ABuildTool::SetSelectedBuilding(int Index)
 {
-	if (CurrentlyPlacing)
-		OnUnEquip();
-	
-	if (IsValid(Buildings[Index]))
+
+	if (Buildings.IsValidIndex(Index))
 	{
 		SelectedBuildingIndex = Index;
 
