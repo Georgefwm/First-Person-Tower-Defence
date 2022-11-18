@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	UDataTable* BuildingDataTable;
 	
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	int BuildRotationOffset = 0;
 
 	UPROPERTY(VisibleAnywhere)
@@ -72,7 +72,7 @@ public:
 	virtual void PrimaryFirePressed() override;
 	
 	/** Make the weapon Fire a Projectile */
-	virtual void SecondaryFire() override;
+	virtual void SecondaryFirePressed() override;
 
 	/** Reload Weapon */
 	virtual void Reload() override;

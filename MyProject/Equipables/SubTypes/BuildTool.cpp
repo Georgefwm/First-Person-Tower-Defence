@@ -178,8 +178,7 @@ FVector ABuildTool::GetBuildLocation()
 FRotator ABuildTool::GetBuildRotation()
 {
 	FRotator Rotation = { 0, WeaponOwner->GetActorForwardVector().ToOrientationRotator().Yaw, 0 };
-	double Change = (static_cast<int>(Rotation.Yaw) + BuildRotationOffset) % 360;
-	Rotation.Yaw = Change;
+	Rotation.Add(0, BuildRotationOffset, 0);
 	
 	return Rotation;
 }
@@ -227,7 +226,7 @@ void ABuildTool::PrimaryFirePressed()
 }
 
 // Adds a rotation offset to the build location
-void ABuildTool::SecondaryFire()
+void ABuildTool::SecondaryFirePressed()
 {
 	int Change = (BuildRotationOffset + 90) % 360;
 	BuildRotationOffset = Change;

@@ -64,9 +64,7 @@ void ABuilding::BeginPlay()
 
 	LastAttackTime = GetWorld()->GetTimeSeconds() - 100;
 
-	TurretBaseMeshComponent->SetMaterial(0, ValidPlacementMaterial);
-	TurretGunMeshComponent->SetMaterial(0, ValidPlacementMaterial);
-	CurrentBuildingState = EBuildingState::BS_Placing;
+	SetBuildingState(EBuildingState::BS_Placing);
 }
 
 bool ABuilding::IsValidBuildingLocation()
@@ -106,15 +104,21 @@ void ABuilding::UpdatePreview()
 
 void ABuilding::SetBuildingState(EBuildingState State)
 {
-	if (State == EBuildingState::BS_Placing && CurrentBuildingState != EBuildingState::BS_Placing)
+	if (State == EBuildingState::BS_Placing)
 	{
 		TurretBaseMeshComponent->SetMaterial(0, ValidPlacementMaterial);
 		TurretGunMeshComponent->SetMaterial(0, ValidPlacementMaterial);
+
+		TurretBaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		TurretGunMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	}
 	else if (State != EBuildingState::BS_Placing && CurrentBuildingState == EBuildingState::BS_Placing)
 	{
 		TurretBaseMeshComponent->SetMaterial(0, TurretBaseMaterial);
 		TurretGunMeshComponent->SetMaterial(0, TurretGunMaterial);
+
+		TurretBaseMeshComponent->SetCollisionProfileName(FName("BlockAllDynamic"));
+		TurretGunMeshComponent->SetCollisionProfileName(FName("BlockAllDynamic"));
 	}
 	
 	CurrentBuildingState = State;
@@ -244,7 +248,7 @@ void ABuilding::SetBuildingOwner(APlayerCharacter* Builder)
 void ABuilding::UpdatePlacementPosition(FVector Location, FRotator Rotation)
 {
 	SetActorLocation(Location, false, nullptr, ETeleportType::ResetPhysics);
-	SetActorRotation(Rotation);
+	SetActorRotation(Rotation, ETeleportType::ResetPhysics);
 }
 
 // Called every frame
