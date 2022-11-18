@@ -9,9 +9,18 @@ struct FBuildingStats : public FTableRowBase
 	
 	GENERATED_BODY()
 	
-public:	
+public:
 	UPROPERTY(BlueprintReadWrite)
-	int MaxHp;
+	FString PathToBpClass;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString DisplayName;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString Description;
+	
+	UPROPERTY(BlueprintReadWrite)
+	int MaxHealthPoints;
 
 	UPROPERTY(BlueprintReadWrite)
 	float AttackRange;
@@ -24,4 +33,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	float BuildTime;
+
+	UPROPERTY(BlueprintReadWrite)
+	int Cost;
 };

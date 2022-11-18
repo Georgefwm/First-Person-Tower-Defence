@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "MyProject/Enemies/Enemy.h"
 #include "Building.generated.h"
 
+class UDataTable;
 UENUM()
 enum class ETargetPriority : uint8
 {
@@ -39,21 +39,29 @@ public:
 	ABuilding();
 
 	/** Stats */
+
+	UPROPERTY(EditDefaultsOnly, Category = "Building Properties")
+	UDataTable* BuildingDataTable;
+
+	FString BuildingName;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int MaxHealthPoints;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float AttackRange;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int AttackDamage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float AttackSpeed;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float BuildTime;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	int Cost;
 
 	
 	/** Runtime vars */
@@ -104,6 +112,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	AEnemy* CurrentTarget = nullptr;
 
+	// UI
+	
+	UPROPERTY()
+	FString DisplayName;
+
+	UFUNCTION(BlueprintCallable)
+	FString GetDisplayName();
+
+	UPROPERTY()
+	FString Description;
+
+	UFUNCTION(BlueprintCallable)
+	FString GetDescription();
+
 	
 
 	// Decide how the building should target available enemies
@@ -149,6 +171,9 @@ protected:
 
 	UFUNCTION()
 	virtual void CheckForNewTarget();
+
+	UFUNCTION()
+	virtual void SetupStats();
 
 public:
 	// Called every frame

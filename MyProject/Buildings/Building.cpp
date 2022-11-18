@@ -2,6 +2,8 @@
 
 
 #include "Building.h"
+
+#include "BuildingStats.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyProject/Enemies/Enemy.h"
@@ -38,6 +40,16 @@ ABuilding::ABuilding()
 	TurretGunMaterial = CreateDefaultSubobject<UMaterial>(TEXT("GunMat"));
 	
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+}
+
+FString ABuilding::GetDisplayName()
+{
+	return DisplayName;
+}
+
+FString ABuilding::GetDescription()
+{
+	return Description;
 }
 
 FVector ABuilding::GetSearchPosition()
@@ -153,6 +165,75 @@ bool ABuilding::HasLineOfSight(AEnemy* Target)
 
 void ABuilding::CheckForNewTarget()
 {
+	AEnemy* NextTarget = nullptr;
+	float ShortestDistance = AttackRange; // Set maximum distance that we can attack (collision sphere radius)
+
+	TArray<AActor*> Actors;
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+
+	// Get all Enemies in sphere radius
+	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetSearchPosition(), AttackRange, ObjectTypes,
+		AEnemy::StaticClass(), ActorsToIgnore, Actors);
+
+	// Always try to attack the closet enemy
+	for (AActor* Actor : Actors)
+	{
+		// Might be redundant check
+		if (AEnemy* Enemy = Cast<AEnemy>(Actor))
+		{
+			if (!IsValid(Enemy))
+				return;
+
+			if (Enemy->IsDead)
+				continue;
+
+			float Distance = FVector::Dist(GetSearchPosition(), Enemy->GetActorLocation());
+
+			if (Distance < ShortestDistance && HasLineOfSight(Enemy))
+			{
+				NextTarget = Enemy;
+				ShortestDistance = Distance;
+			}
+		}
+	}
+	CurrentTarget = NextTarget;
+
+	// Set Building state
+	if (CurrentTarget != nullptr)
+		SetBuildingState(EBuildingState::BS_Attacking);
+	else
+		SetBuildingState(EBuildingState::BS_Idle);
+}
+
+void ABuilding::SetupStats()
+{
+	if (BuildingDataTable == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Data table not set for weapon"));	
+		return;
+	}
+	
+	const TCHAR* CBuildingName = *BuildingName;
+	if (FBuildingStats* OutRow = BuildingDataTable->FindRow<FBuildingStats>(CBuildingName, "WeaponStats", true))
+	{
+		DisplayName = OutRow->DisplayName;
+		Description = OutRow->Description;
+		MaxHealthPoints = OutRow->MaxHealthPoints;
+		AttackRange = OutRow->AttackRange;
+		AttackDamage = OutRow->AttackDamage;
+		AttackSpeed = OutRow->AttackSpeed;
+		BuildTime = OutRow->BuildTime;
+		Cost = OutRow->Cost;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to read Building data table"));
+	}
 }
 
 void ABuilding::SetBuildingOwner(APlayerCharacter* Builder)
