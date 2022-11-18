@@ -29,9 +29,9 @@ void APistolWeapon::PrimaryFireReleased()
 {
 }
 
-void APistolWeapon::SecondaryFire()
+void APistolWeapon::SecondaryFirePressed()
 {
-	Super::SecondaryFire();
+	Super::SecondaryFirePressed();
 }
 
 void APistolWeapon::Reload()

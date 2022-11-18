@@ -210,8 +210,8 @@ void APlayerCharacter::OnPrimaryActionReleased()
 
 void APlayerCharacter::OnSecondaryActionPressed()
 {
-	// if (IsValid(EquippedWeapon))
-	// 	EquippedWeapon->SecondaryFire();
+	if (EquippedWeapon)
+		EquippedWeapon->SecondaryFirePressed();
 }
 
 void APlayerCharacter::OnSecondaryActionReleased()

@@ -22,9 +22,9 @@ void AShotgunWeapon::PrimaryFirePressed()
 	Super::PrimaryFirePressed();
 }
 
-void AShotgunWeapon::SecondaryFire()
+void AShotgunWeapon::SecondaryFirePressed()
 {
-	Super::SecondaryFire();
+	Super::SecondaryFirePressed();
 }
 
 void AShotgunWeapon::Reload()

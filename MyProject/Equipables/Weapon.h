@@ -148,9 +148,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Backend")
 	void FireHitScan();
 	
-	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Backend")
-	virtual void SecondaryFire();
+	virtual void SecondaryFirePressed();
+
+	UFUNCTION(BlueprintCallable, Category="Backend")
+	virtual void SecondaryFireReleased();
 
 	/** Reload Weapon */
 	UFUNCTION(BlueprintCallable, Category="Backend")

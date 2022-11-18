@@ -37,9 +37,9 @@ void ASmgWeapon::PrimaryFireReleased()
 	GetWorldTimerManager().ClearTimer(FireTimer);
 }
 
-void ASmgWeapon::SecondaryFire()
+void ASmgWeapon::SecondaryFirePressed()
 {
-	Super::SecondaryFire();
+	Super::SecondaryFirePressed();
 }
 
 void ASmgWeapon::Reload()

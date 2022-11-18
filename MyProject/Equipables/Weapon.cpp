@@ -100,7 +100,12 @@ void AWeapon::FireHitScan()
 	LastFireTime = GetWorld()->GetTimeSeconds();
 }
 
-void AWeapon::SecondaryFire()
+void AWeapon::SecondaryFirePressed()
+{
+	
+}
+
+void AWeapon::SecondaryFireReleased()
 {
 }
 
