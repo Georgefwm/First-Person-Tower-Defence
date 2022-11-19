@@ -128,7 +128,7 @@ void ABuilding::Build(float DeltaTime)
 {
 	if (BuildStatus >= BuildTime)
 	{
-		CurrentBuildingState = EBuildingState::BS_Idle;
+		SetBuildingState(EBuildingState::BS_Idle);
 	}
 	
 	CurrentHealthPoints += MaxHealthPoints * (DeltaTime / BuildTime);
