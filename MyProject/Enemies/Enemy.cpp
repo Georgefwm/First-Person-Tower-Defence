@@ -6,7 +6,11 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "MyProject/Core/TowerDefenceGameMode.h"
+#include "MyProject/Core/TowerDefenceGameState.h"
 #include "MyProject/ModifierEffects/ModiferComponent.h"
 #include "MyProject/ModifierEffects/SubTypes/MoveSlowModifier.h"
 
@@ -143,6 +147,13 @@ void AEnemy::Die()
 	GetCharacterMovement()->DisableMovement();
 
 	SetLifeSpan(2);
+
+	// Tell the game to check if the wave has finished
+	AGameStateBase* GameState = GetWorld()->GetGameState();
+	if (ATowerDefenceGameState* TDGameState = StaticCast<ATowerDefenceGameState*>(GameState))
+	{
+		TDGameState->UpdateGameState();
+	}
 }
 
 // Handles healing and damage
