@@ -9,6 +9,7 @@
 #include "Building.generated.h"
 
 class UDataTable;
+
 UENUM()
 enum class ETargetPriority : uint8
 {
