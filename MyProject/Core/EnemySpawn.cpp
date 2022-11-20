@@ -22,7 +22,7 @@ void AEnemySpawn::GenerateWave(int WaveNumber)
 	
 	WaveSpawnOrder.Empty();
 	
-	int WaveSize = WaveNumber * WaveNumber + 1;
+	int WaveSize = WaveNumber * 2 + 1;
 
 	for (int EnemyCount = 0; EnemyCount < WaveSize; EnemyCount++)
 	{
@@ -52,6 +52,9 @@ void AEnemySpawn::SpawnEnemy()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
 	AEnemy* NewEnemy = GetWorld()->SpawnActor<AEnemy>(WaveSpawnOrder.Pop(), Location, Rotation, Params);
+
+	int const WaveHealthModifier = NewEnemy->GetHP();
+	NewEnemy->ModifyMaxHealth(WaveHealthModifier);
 }
 
 bool AEnemySpawn::WaveSpawnsRemaining()
