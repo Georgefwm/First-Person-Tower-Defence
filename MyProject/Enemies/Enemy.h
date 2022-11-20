@@ -84,6 +84,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDieBp();
 
+	// Sets Max health and refills it
+	UFUNCTION()
+	void ModifyMaxHealth(int NewHealth);
+
 	// Increase health (heal)
 	UFUNCTION()
 	void IncrementHealth(int Healing);
@@ -114,6 +118,9 @@ public:
 	// Gives this enemy a modifier
 	UFUNCTION()
 	virtual void GiveModifier(UClass* ModClass);
+
+	UFUNCTION(BlueprintCallable)
+	void SetDead() { IsDead = true; };
 	
 	UFUNCTION()
 	void Die();

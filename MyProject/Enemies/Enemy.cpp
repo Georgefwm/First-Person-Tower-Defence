@@ -156,6 +156,15 @@ void AEnemy::Die()
 	}
 }
 
+void AEnemy::ModifyMaxHealth(int NewHealth)
+{
+	if (NewHealth <= 1)
+		return;
+	
+	MaxHealthPoints = NewHealth;
+	HealthPoints = MaxHealthPoints;
+}
+
 // Handles healing and damage
 void AEnemy::IncrementHealth(int Healing)
 {
