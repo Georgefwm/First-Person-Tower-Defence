@@ -130,7 +130,7 @@ private:
 
 	/** Resource Amount */
 	UPROPERTY(EditAnywhere, Category = "HUD Elements")
-	int Gold = 500;
+	int Gold = 150;
 
 	
 	
