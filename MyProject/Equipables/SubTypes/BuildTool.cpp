@@ -216,9 +216,15 @@ void ABuildTool::PrimaryFirePressed()
 		if (BuildingBeingPlaced == nullptr)
 			return;
 
+		if (BuildingBeingPlaced->BuildingOwner->GetCurrentGold() < BuildingBeingPlaced->Cost)
+		{
+			return;
+		}
+		
 		if (BuildingBeingPlaced->IsValidBuildingLocation())
 		{
 			CurrentlyPlacing = false;
+			BuildingBeingPlaced->BuildingOwner->DecrementGold(BuildingBeingPlaced->Cost);
 			BuildingBeingPlaced->SetBuildingState(EBuildingState::BS_Building);
 			BuildingBeingPlaced = nullptr;
 		}
