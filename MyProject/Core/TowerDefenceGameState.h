@@ -34,6 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EPlayState GetPlayState() const { return PlayState; }
 
+	UFUNCTION(BlueprintCallable)
 	void UpdateGameState();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Information")
@@ -47,6 +48,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void IncrementLives(int Amount);
+
+	UFUNCTION(BlueprintCallable)
+	int GetRemainingLives() const { return RemainingLives; }
 
 	/** Current wave (starts at zero) */
 	UPROPERTY(VisibleAnywhere, Category = "Game Information")
