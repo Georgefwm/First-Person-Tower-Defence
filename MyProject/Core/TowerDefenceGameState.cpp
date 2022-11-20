@@ -8,9 +8,9 @@ ATowerDefenceGameState::ATowerDefenceGameState()
 	:Super()
 {
 	WaveNumber = 0;
-	BetweenWaveBreak = 3;
+	BetweenWaveBreak = 10;
 	
-	MaxLives = 100;
+	MaxLives = 10;
 	RemainingLives = MaxLives;
 
 	PlayState = EPlayState::PS_Defending;
@@ -67,6 +67,7 @@ void ATowerDefenceGameState::DecrementLives(int Amount)
 	// Lose condition
 	if (RemainingLives - Amount <= 0)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("You Lost :("));
 		//EndGame();
 	}
 	
