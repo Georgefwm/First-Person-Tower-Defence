@@ -22,6 +22,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<AEnemy>> WaveSpawnOrder;
 
+	UPROPERTY()
+	int CurrentWaveHealthModifier;
+
+	UFUNCTION()
+	int CalculateWaveHealthModifier(int WaveNumber);
+
 	UFUNCTION()
 	void GenerateWave(int WaveNumber);
 

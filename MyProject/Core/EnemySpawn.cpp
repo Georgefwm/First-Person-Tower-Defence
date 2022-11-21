@@ -12,6 +12,23 @@ AEnemySpawn::AEnemySpawn()
 	SpawnRate = 0.5;
 }
 
+int AEnemySpawn::CalculateWaveHealthModifier(int WaveNumber)
+{
+	int const MaxHealthModification = 500;
+	int const WaveScaling = 25;
+
+	int ProposedModification = WaveScaling * WaveNumber;
+
+	if (ProposedModification > MaxHealthModification)
+	{
+		return MaxHealthModification;
+	}
+	else
+	{
+		return ProposedModification;
+	}
+}
+
 void AEnemySpawn::GenerateWave(int WaveNumber)
 {
 	if (EnemyClasses.IsEmpty())
@@ -23,6 +40,9 @@ void AEnemySpawn::GenerateWave(int WaveNumber)
 	WaveSpawnOrder.Empty();
 	
 	int WaveSize = WaveNumber * 2 + 1;
+
+	// Calculate the health that enemies should have based on wave scaling function
+	CurrentWaveHealthModifier = CalculateWaveHealthModifier(WaveNumber);
 
 	for (int EnemyCount = 0; EnemyCount < WaveSize; EnemyCount++)
 	{
@@ -38,7 +58,6 @@ void AEnemySpawn::StartWave()
 
 void AEnemySpawn::SpawnEnemy()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SPAWN: Spawning enemy"));
 	if (WaveSpawnOrder.IsEmpty())
 	{
 		GetWorldTimerManager().ClearTimer(SpawnTimer);
@@ -52,9 +71,8 @@ void AEnemySpawn::SpawnEnemy()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
 	AEnemy* NewEnemy = GetWorld()->SpawnActor<AEnemy>(WaveSpawnOrder.Pop(), Location, Rotation, Params);
-
-	int const WaveHealthModifier = NewEnemy->GetHP();
-	NewEnemy->ModifyMaxHealth(WaveHealthModifier);
+	
+	NewEnemy->ModifyMaxHealth(NewEnemy->GetHP() + CurrentWaveHealthModifier);
 }
 
 bool AEnemySpawn::WaveSpawnsRemaining()
