@@ -80,7 +80,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	bool IsActiveWeapon;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, Category = "Stats")
 	UDataTable* WeaponDataTable;
 
 	/** Damage from 1 hit */
