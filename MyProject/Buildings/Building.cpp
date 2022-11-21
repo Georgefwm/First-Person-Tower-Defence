@@ -16,7 +16,7 @@ ABuilding::ABuilding()
 	PrimaryActorTick.bCanEverTick = true;
 
 	TurretBaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TurretBase"));
-	RootComponent = TurretBaseMeshComponent;
+	SetRootComponent(TurretBaseMeshComponent);
 	TurretBaseMeshComponent->SetRelativeScale3D(FVector(20.0, 20.0, 20.0));
 	
 
@@ -40,6 +40,8 @@ ABuilding::ABuilding()
 	TurretGunMaterial = CreateDefaultSubobject<UMaterial>(TEXT("GunMat"));
 	
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	BuildingDataTable = LoadObject<UDataTable>(GetWorld(), TEXT("/Game/Buildings/BuildingDataTable"));
 }
 
 FString ABuilding::GetDisplayName()
@@ -69,6 +71,11 @@ void ABuilding::BeginPlay()
 
 bool ABuilding::IsValidBuildingLocation()
 {
+	if (BuildingOwner->GetCurrentGold() < Cost)
+	{
+		return false;
+	}
+
 	TArray<AActor*> Actors;
 
 	TArray<AActor*> ActorsToIgnore;
@@ -82,7 +89,7 @@ bool ABuilding::IsValidBuildingLocation()
 	UKismetSystemLibrary::BoxOverlapActors(GetWorld(), GetSearchPosition(), CollisionComponent->GetUnscaledBoxExtent(),
 		ObjectTypes, nullptr, ActorsToIgnore, Actors);
 	
-
+	
 	return Actors.IsEmpty();
 }
 
@@ -216,9 +223,9 @@ void ABuilding::CheckForNewTarget()
 
 void ABuilding::SetupStats()
 {
-	if (BuildingDataTable == nullptr)
+	if (!IsValid(BuildingDataTable))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Data table not set for weapon"));	
+		UE_LOG(LogTemp, Error, TEXT("BUILDING: Data table not set"));	
 		return;
 	}
 	

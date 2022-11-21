@@ -41,9 +41,10 @@ public:
 
 	/** Stats */
 
-	UPROPERTY(EditDefaultsOnly, Category = "Building Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
 	UDataTable* BuildingDataTable;
 
+	UPROPERTY()
 	FString BuildingName;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
