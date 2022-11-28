@@ -51,17 +51,25 @@ APlayerCharacter::APlayerCharacter()
 
 	this->CurrentHealthPoints = this->MaxHealthPoints;
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> PlayerPawnClassFinder(TEXT("/Game/Player/HUD/PlayerHUDBP"));
-	HUDClass = PlayerPawnClassFinder.Class;
+	static ConstructorHelpers::FClassFinder<UUserWidget> HUDWidgetFinder(TEXT("/Game/Player/HUD/PlayerHUDBP"));
+	HUDClass = HUDWidgetFinder.Class;
 	
 	if (IsValid(HUDClass))
 	{
-		CurrentWidget = Cast<UUserWidget>(CreateWidget(GetWorld(), HUDClass));
+		HUDWidget = Cast<UUserWidget>(CreateWidget(GetWorld(), HUDClass));
 
-		if (CurrentWidget != nullptr)
+		if (HUDWidget != nullptr)
 		{
-			CurrentWidget->AddToViewport();
+			HUDWidget->AddToViewport();
 		}
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> PauseMenuWidgetFinder(TEXT("/Game/Levels/PauseMenu/PauseMenuWidget"));
+	PauseWidgetClass = PauseMenuWidgetFinder.Class;
+
+	if (IsValid(PauseWidgetClass))
+	{
+		PauseMenuWidget = Cast<UUserWidget>(CreateWidget(GetWorld(), PauseWidgetClass));
 	}
 }
 
@@ -138,6 +146,9 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	// Bind movement events
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
+
+	// UI events
+	PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &APlayerCharacter::OnPausedPressed);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "Mouse" versions handle devices that provide an absolute delta, such as a mouse.

@@ -138,9 +138,22 @@ private:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD Elements")
 	TSubclassOf<UUserWidget> HUDClass;
+	
+	UPROPERTY(EditAnywhere)
+	UUserWidget* HUDWidget;
 
-	UPROPERTY()
-	UUserWidget* CurrentWidget;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD Elements")
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+	
+	UPROPERTY(EditAnywhere)
+	UUserWidget* PauseMenuWidget;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	UUserWidget* GetHUDWidget() { return HUDWidget; }
+
+	UFUNCTION(BlueprintCallable)
+	UUserWidget* GetPauseMenuWidget() { return PauseMenuWidget; }
 
 /** Functions */
 public:
@@ -180,6 +193,9 @@ protected:
 	void OnSecondaryActionPressed();
 	void OnSecondaryActionReleased();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPausedPressed();
+
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
 
@@ -215,9 +231,10 @@ protected:
 	TouchData	TouchItem;
 	
 protected:
+	
+	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	// End of APawn interface
 	
 };
 
