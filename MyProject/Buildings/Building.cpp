@@ -3,6 +3,8 @@
 
 #include "Building.h"
 
+#include <string>
+
 #include "BuildingStats.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,34 +16,113 @@ ABuilding::ABuilding()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	TurretBaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TurretBase"));
-	SetRootComponent(TurretBaseMeshComponent);
-	TurretBaseMeshComponent->SetRelativeScale3D(FVector(20.0, 20.0, 20.0));
 	
+	MeshRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SharedRoot"));
+	RootComponent = MeshRoot;
 
 	CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComponent"));
-	CollisionComponent->SetupAttachment(TurretBaseMeshComponent);
-	float const BoxHeight = 55;
-	CollisionComponent->SetRelativeScale3D(FVector(1/20.0, 1/20.0, 1/20.0));
+	CollisionComponent->SetupAttachment(MeshRoot);
+	float const BoxHeight = 55.0;
 	CollisionComponent->InitBoxExtent(FVector(80, 80, BoxHeight));
-	CollisionComponent->SetRelativeLocation(FVector(0, 0, 2.75));
+	CollisionComponent->SetRelativeLocation(FVector(0, 0, BoxHeight + 1)); // +1 to avoid ground collision
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
-	TurretGunMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TurretGun"));
-	TurretGunMeshComponent->SetupAttachment(TurretBaseMeshComponent);
-	TurretGunMeshComponent->SetRelativeScale3D(FVector(1.0, 1.0, 1.0));
-
+	AnimateYawMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("YawAnimationMesh"));
+	AnimateYawMesh->SetupAttachment(MeshRoot);
+	AnimateYawMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	
+	AnimatePitchMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PitchAnimationMesh"));
+	AnimatePitchMesh->SetupAttachment(AnimateYawMesh);
+	AnimatePitchMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	
 	ValidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("ValidPlacementMaterial"));
 	InvalidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("InvalidPlacementMaterial"));
 	
-	TurretBaseMaterial = CreateDefaultSubobject<UMaterial>(TEXT("BaseMat"));
-	TurretGunMaterial = CreateDefaultSubobject<UMaterial>(TEXT("GunMat"));
+	TurretMaterial = CreateDefaultSubobject<UMaterial>(TEXT("TurretMaterial"));
 	
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	BuildingDataTable = LoadObject<UDataTable>(GetWorld(), TEXT("/Game/Buildings/BuildingDataTable"));
+}
+
+
+void ABuilding::SetYawTarget(float DesiredYaw)
+{
+	CurrentYawTarget.Yaw = DesiredYaw;
+}
+
+void ABuilding::SetPitchTarget(float DesiredPitch)
+{
+	CurrentPitchTarget.Pitch = DesiredPitch;
+}
+
+void ABuilding::UpdateRotation(float DeltaTime)
+{
+	
+	if (CurrentBuildingState == EBuildingState::BS_Attacking)
+	{
+		// Follow target if attacking
+		
+		FRotator const LookAtYawRotation = (CurrentTarget->GetActorLocation() - AnimateYawMesh->GetComponentLocation()).Rotation();
+		SetYawTarget(LookAtYawRotation.Yaw);
+		
+		FRotator const LookAtPitchRotation = (CurrentTarget->GetActorLocation() - AnimatePitchMesh->GetComponentLocation()).Rotation();
+		SetPitchTarget(LookAtPitchRotation.Pitch);
+	}
+	else // Return to base animation if not attacking
+	{
+		FRotator BaseRotation = GetActorForwardVector().Rotation();
+		
+		BaseRotation.Yaw += static_cast<double>(FMath::Cos(GetGameTimeSinceCreation())) * 20;
+		
+		SetYawTarget(BaseRotation.Yaw);
+		SetPitchTarget(BaseRotation.Pitch);
+	}
+	
+	// FRotator NewPitchRotation = FMath::RInterpTo(AnimatePitchMesh->GetComponentRotation(), CurrentPitchTarget, DeltaTime, MaxRotationSpeed);
+	
+	double const NewYawRotation = FMath::Clamp(CurrentYawTarget.Yaw - AnimateYawMesh->GetComponentRotation().Yaw,
+		-MaxRotationSpeed, MaxRotationSpeed);
+	
+	double const NewPitchRotation = FMath::Clamp(CurrentPitchTarget.Pitch - AnimatePitchMesh->GetComponentRotation().Pitch,
+		-MaxRotationSpeed, MaxRotationSpeed);
+
+	// Remember to update yaw since we are using World rotation
+	//NewPitchRotation = NewYawRotation;
+
+	AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
+	AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
+}
+
+void ABuilding::ChangeAllMeshMaterials(EMaterialState State)
+{
+	TArray<UActorComponent*> Components;
+	GetComponents(UStaticMeshComponent::StaticClass(), Components);
+
+	for (UActorComponent* Component : Components)
+	{
+		if (UStaticMeshComponent* MeshComponent = StaticCast<UStaticMeshComponent*>(Component))
+		{
+
+			
+			// TODO: Clean up. there must be a cleaner way to do this
+			switch (State)
+			{
+				case (EMaterialState::MS_Normal):
+					{
+						MeshComponent->SetMaterial(0, TurretMaterial);
+					} continue;
+				
+				case (EMaterialState::MS_Valid):
+					{ MeshComponent->SetMaterial(0, ValidPlacementMaterial);		} continue;
+				
+				case (EMaterialState::MS_Invalid):
+					{ MeshComponent->SetMaterial(0, InvalidPlacementMaterial);	} continue;
+				
+				default: return;
+			}
+		}
+	}
 }
 
 FString ABuilding::GetDisplayName()
@@ -66,6 +147,17 @@ void ABuilding::BeginPlay()
 
 	LastAttackTime = GetWorld()->GetTimeSeconds() - 100;
 
+	TArray<UActorComponent*> Components;
+	GetComponents(UStaticMeshComponent::StaticClass(), Components);
+
+	for (UActorComponent* Component : Components)
+	{
+		if (UStaticMeshComponent* MeshComponent = StaticCast<UStaticMeshComponent*>(Component))
+		{
+			MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		}
+	}
+
 	SetBuildingState(EBuildingState::BS_Placing);
 }
 
@@ -86,46 +178,47 @@ bool ABuilding::IsValidBuildingLocation()
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 
 	// Get all Enemies in sphere radius
-	UKismetSystemLibrary::BoxOverlapActors(GetWorld(), GetSearchPosition(), CollisionComponent->GetUnscaledBoxExtent(),
-		ObjectTypes, nullptr, ActorsToIgnore, Actors);
-	
+	UKismetSystemLibrary::BoxOverlapActors(GetWorld(), CollisionComponent->GetComponentLocation(),
+		CollisionComponent->GetUnscaledBoxExtent(), ObjectTypes, nullptr, ActorsToIgnore, Actors);
 	
 	return Actors.IsEmpty();
 }
 
 void ABuilding::UpdatePreview()
 {
+	bool const PlacementValidity = IsValidBuildingLocation();
 	
-	if (IsValidBuildingLocation())
+	// Prevents material update every tick when not needed
+	if (LastCheckedValidity == PlacementValidity)
+		return;
+	
+	if (PlacementValidity)
 	{
-		TurretBaseMeshComponent->SetMaterial(0, ValidPlacementMaterial);
-		TurretGunMeshComponent->SetMaterial(0, ValidPlacementMaterial);
+		ChangeAllMeshMaterials(EMaterialState::MS_Valid);
 	}
 	else
 	{
-		TurretBaseMeshComponent->SetMaterial(0, InvalidPlacementMaterial);
-		TurretGunMeshComponent->SetMaterial(0, InvalidPlacementMaterial);
+		ChangeAllMeshMaterials(EMaterialState::MS_Invalid);
 	}
-	
+
+	LastCheckedValidity = PlacementValidity;
 }
 
 void ABuilding::SetBuildingState(EBuildingState State)
 {
 	if (State == EBuildingState::BS_Placing)
 	{
-		TurretBaseMeshComponent->SetMaterial(0, ValidPlacementMaterial);
-		TurretGunMeshComponent->SetMaterial(0, ValidPlacementMaterial);
-
-		TurretBaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		TurretGunMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		// Set material to placement
+		ChangeAllMeshMaterials(EMaterialState::MS_Valid);
+		
+		CollisionComponent->SetCollisionProfileName(FName("OverlapAll"));
 	}
-	else if (State != EBuildingState::BS_Placing && CurrentBuildingState == EBuildingState::BS_Placing)
+	else if (CurrentBuildingState == EBuildingState::BS_Placing)
 	{
-		TurretBaseMeshComponent->SetMaterial(0, TurretBaseMaterial);
-		TurretGunMeshComponent->SetMaterial(0, TurretGunMaterial);
+		// Replace the temporary placing material with the final one
+		ChangeAllMeshMaterials(EMaterialState::MS_Normal);
 
-		TurretBaseMeshComponent->SetCollisionProfileName(FName("BlockAllDynamic"));
-		TurretGunMeshComponent->SetCollisionProfileName(FName("BlockAllDynamic"));
+		CollisionComponent->SetCollisionProfileName(FName("BlockAll"));
 	}
 	
 	CurrentBuildingState = State;
@@ -146,6 +239,18 @@ void ABuilding::Attack(float DeltaTime)
 {
 }
 
+double ABuilding::GetTargetBarrelAngleDifference()
+{
+	FRotator CurrentRotation = AnimatePitchMesh->GetComponentRotation();
+	FRotator PerfectRotation = (CurrentTarget->GetActorLocation() - AnimatePitchMesh->GetComponentLocation()).Rotation();
+	//double const Deviation = FVector::DotProduct(, );
+	double const Diff = PerfectRotation.GetManhattanDistance(CurrentRotation);
+	
+	//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, FString::Printf(TEXT("Angle: %f"), Diff));
+	
+	return Diff;
+}
+
 bool ABuilding::HasLineOfSight(AEnemy* Target)
 {
 	FVector Location = this->GetSearchPosition();
@@ -159,8 +264,6 @@ bool ABuilding::HasLineOfSight(AEnemy* Target)
 	TraceParams.AddIgnoredActor(this);
 	TraceParams.bFindInitialOverlaps = true;
 	TraceParams.AddIgnoredActor(BuildingOwner);
-
-	
 	
 	bool Hit = GetWorld()->LineTraceSingleByChannel(HitRes, From, To, ECC_Visibility, TraceParams);
 
@@ -265,25 +368,16 @@ void ABuilding::Tick(float DeltaTime)
 
 	switch (CurrentBuildingState)
 	{
-		case (EBuildingState::BS_Placing):		{ UpdatePreview();							} break;
-		case (EBuildingState::BS_Building):		{ Build(DeltaTime);							} break;
+		case (EBuildingState::BS_Placing):		{ UpdatePreview();							} return;
+		case (EBuildingState::BS_Building):		{ Build(DeltaTime);							} return;
 		case (EBuildingState::BS_Idle):			{ CheckForNewTarget();						} break;
 		case (EBuildingState::BS_Attacking):	{ CheckForNewTarget(); Attack(DeltaTime);	} break;
 		case (EBuildingState::BS_Disabled):		{											} break;
 		default: return;
 	}
 
-	if (CurrentBuildingState == EBuildingState::BS_Placing || CurrentBuildingState == EBuildingState::BS_Building)
-		return;
-	
-	FRotator NewRotation = GetActorRotation();
-	if (CurrentBuildingState == EBuildingState::BS_Attacking)
-	{
-		FRotator const LookAtRotation = (CurrentTarget->GetActorLocation() - TurretGunMeshComponent->GetComponentLocation()).Rotation();
-		NewRotation.Yaw = LookAtRotation.Yaw;
-	}
-	NewRotation.Yaw -= 90;
-	TurretGunMeshComponent->SetWorldRotation(NewRotation);
+	if (Rotates)
+		UpdateRotation(DeltaTime);
 }
 
 void ABuilding::DestroyBuilding()

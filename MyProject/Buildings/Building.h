@@ -16,7 +16,7 @@ enum class ETargetPriority : uint8
 	TP_LowestDistance		UMETA(DisplayName="Lowest Distance"),
 	TP_HighestDistance		UMETA(DisplayName="Highest Distance"),
 	TP_HighestHp			UMETA(DisplayName="Highest HP"),
-	TP_LowestHp				UMETA(DisplayName="Lowest HP"),
+	TP_LowestHp				UMETA(DisplayName="Lowest HP")
 };
 
 UENUM()
@@ -27,6 +27,14 @@ enum class EBuildingState : uint8
 	BS_Idle			UMETA(DisplayName="Idle"),
 	BS_Attacking	UMETA(DisplayName="Attacking"),
 	BS_Disabled		UMETA(DisplayName="Disabled")
+};
+
+UENUM()
+enum class EMaterialState : uint8
+{
+	MS_Valid		UMETA(DisplayName="Valid"),
+	MS_Invalid		UMETA(DisplayName="Invalid"),
+	MS_Normal		UMETA(DisplayName="Normal")
 };
 
 
@@ -64,6 +72,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int Cost;
+	
+	UPROPERTY()
+	bool Rotates = true;
 
 	
 	/** Runtime vars */
@@ -75,15 +86,48 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UBoxComponent* CollisionComponent;
 
+	// Maximum angle deviation allowed to attack enemy
+	UPROPERTY()
+	double MaxAttackAngleDeviation = 5.0;
+	
+	// Speed of rotation interpolation in degrees
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	float MaxRotationSpeed = 2.0;
+
 	// Mesh
-	
+
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* TurretBaseMeshComponent;
-	
+	USceneComponent* MeshRoot;
+
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* TurretGunMeshComponent;
+	UStaticMeshComponent* AnimateYawMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* AnimatePitchMesh;
+
+	// Mesh 'Animation'
+
+	
+
+	UPROPERTY()
+	FRotator CurrentYawTarget = FRotator(0.0, 0.0, 0.0);
+
+	UPROPERTY()
+	FRotator CurrentPitchTarget = FRotator(0.0, 0.0, 0.0);
+
+	UFUNCTION()
+	void SetYawTarget(float DesiredYaw);
+
+	UFUNCTION()
+	void SetPitchTarget(float DesiredPitch);
+
+	UFUNCTION()
+	void UpdateRotation(float DeltaTime);
 
 	// Material
+
+	UPROPERTY()
+	bool LastCheckedValidity = false;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Placement")
 	UMaterialInterface* ValidPlacementMaterial;
@@ -92,10 +136,10 @@ public:
 	UMaterialInterface* InvalidPlacementMaterial;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Material")
-	UMaterialInterface* TurretBaseMaterial;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Material")
-	UMaterialInterface* TurretGunMaterial;
+	UMaterialInterface* TurretMaterial;
+
+	UFUNCTION()
+	void ChangeAllMeshMaterials(EMaterialState State);
 
 	// Sound
 	
@@ -127,7 +171,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString GetDescription();
-
 	
 
 	// Decide how the building should target available enemies
@@ -142,9 +185,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
-
 	
-
 	UPROPERTY()
 	TArray<UMaterial*> OriginalMats;
 
@@ -167,6 +208,9 @@ protected:
 
 	UFUNCTION()
 	virtual void Attack(float DeltaTime);
+
+	UFUNCTION()
+	double GetTargetBarrelAngleDifference();
 
 	UFUNCTION()
 	bool HasLineOfSight(AEnemy* Target);

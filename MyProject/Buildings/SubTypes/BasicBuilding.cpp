@@ -11,6 +11,8 @@ ABasicBuilding::ABasicBuilding()
 
 	BuildingName = FString("BasicBuilding");
 
+	SetRootComponent(BaseModel);
+
 	// Import stats from building data table
 	SetupStats();
 	
@@ -55,6 +57,12 @@ void ABasicBuilding::Attack(float DeltaTime)
 			return;
 		}
 
+		if (Rotates)
+		{
+			if(GetTargetBarrelAngleDifference() > MaxAttackAngleDeviation)
+				return;
+		}
+		
 		if (FireSound)
 			UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 0.2, 1, 0);
 		
