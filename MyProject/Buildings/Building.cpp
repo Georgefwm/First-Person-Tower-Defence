@@ -36,7 +36,10 @@ ABuilding::ABuilding()
 	AnimatePitchMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	
 	ValidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("ValidPlacementMaterial"));
+	ValidPlacementMaterial = LoadObject<UMaterial>(nullptr, TEXT("Material'/Game/Buildings/GlobalMaterials/ValidPreviewMaterial'"));
+	
 	InvalidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("InvalidPlacementMaterial"));
+	ValidPlacementMaterial = LoadObject<UMaterial>(nullptr, TEXT("Material'/Game/Buildings/GlobalMaterials/InvalidPreviewMaterial'"));
 	
 	TurretMaterial = CreateDefaultSubobject<UMaterial>(TEXT("TurretMaterial"));
 	
@@ -59,10 +62,8 @@ void ABuilding::SetPitchTarget(float DesiredPitch)
 void ABuilding::UpdateRotation(float DeltaTime)
 {
 	
-	if (CurrentBuildingState == EBuildingState::BS_Attacking)
+	if (CurrentBuildingState == EBuildingState::BS_Attacking) // Follow target if attacking
 	{
-		// Follow target if attacking
-		
 		FRotator const LookAtYawRotation = (CurrentTarget->GetActorLocation() - AnimateYawMesh->GetComponentLocation()).Rotation();
 		SetYawTarget(LookAtYawRotation.Yaw);
 		
@@ -87,9 +88,6 @@ void ABuilding::UpdateRotation(float DeltaTime)
 	double const NewPitchRotation = FMath::Clamp(CurrentPitchTarget.Pitch - AnimatePitchMesh->GetComponentRotation().Pitch,
 		-MaxRotationSpeed, MaxRotationSpeed);
 
-	// Remember to update yaw since we are using World rotation
-	//NewPitchRotation = NewYawRotation;
-
 	AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
 	AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
 }
@@ -103,15 +101,11 @@ void ABuilding::ChangeAllMeshMaterials(EMaterialState State)
 	{
 		if (UStaticMeshComponent* MeshComponent = StaticCast<UStaticMeshComponent*>(Component))
 		{
-
-			
 			// TODO: Clean up. there must be a cleaner way to do this
 			switch (State)
 			{
 				case (EMaterialState::MS_Normal):
-					{
-						MeshComponent->SetMaterial(0, TurretMaterial);
-					} continue;
+					{ MeshComponent->SetMaterial(0, TurretMaterial);				} continue;
 				
 				case (EMaterialState::MS_Valid):
 					{ MeshComponent->SetMaterial(0, ValidPlacementMaterial);		} continue;
@@ -155,6 +149,11 @@ void ABuilding::BeginPlay()
 		if (UStaticMeshComponent* MeshComponent = StaticCast<UStaticMeshComponent*>(Component))
 		{
 			MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+			if (MeshComponent->GetName().Contains("Muzzle", ESearchCase::IgnoreCase))
+			{
+				Muzzles.Add(MeshComponent);
+			}
 		}
 	}
 
