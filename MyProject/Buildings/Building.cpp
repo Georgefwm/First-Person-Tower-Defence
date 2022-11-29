@@ -3,11 +3,11 @@
 
 #include "Building.h"
 
-#include <string>
-
 #include "BuildingStats.h"
 #include "EngineUtils.h"
+#include "Animation/AnimSequenceHelpers.h"
 #include "Engine/StaticMeshSocket.h"
+#include "Engine/TimelineTemplate.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyProject/Enemies/Enemy.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -42,6 +42,8 @@ ABuilding::ABuilding()
 	
 	InvalidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("InvalidPlacementMaterial"));
 	ValidPlacementMaterial = LoadObject<UMaterial>(nullptr, TEXT("Material'/Game/Buildings/GlobalMaterials/InvalidPreviewMaterial'"));
+
+	// RecoilCurve = LoadObject<UCurveFloat>(nullptr, TEXT("CurveFloat'/Game/Buildings/Shared/BuildingRecoilCurve'"));
 	
 	TurretMaterial = CreateDefaultSubobject<UMaterial>(TEXT("TurretMaterial"));
 	
@@ -94,6 +96,34 @@ void ABuilding::UpdateRotation(float DeltaTime)
 	
 	AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
 	AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
+}
+
+void ABuilding::UpdateMuzzles()
+{
+	if (RecoilCurve == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BUILDING: Recoil curve not set"));
+		return;
+	}
+	
+	float const MaxOffset = 20;
+	
+	for (int MuzzleIndex = 0; MuzzleIndex < Muzzles.Num(); MuzzleIndex++)
+	{
+		// We can use since y and z axes are not changed, hopefully does not break later...
+		FVector const CurrentLocation = Muzzles[MuzzleIndex]->GetRelativeLocation();
+
+		float DeltaAnimationTime = GetWorld()->GetTimeSeconds() - LastMuzzleAnimationTime[MuzzleIndex];
+
+		// Skip if it wont change anything
+		if (DeltaAnimationTime > 1.1)
+			continue;
+		
+		FVector NewLocation = FVector(MuzzleBaseRelativeXLocation[MuzzleIndex] - (RecoilCurve->GetFloatValue(DeltaAnimationTime) * MaxOffset),
+			CurrentLocation.Y, CurrentLocation.Z);
+		
+		Muzzles[MuzzleIndex]->SetRelativeLocation(NewLocation);
+	}
 }
 
 void ABuilding::ChangeAllMeshMaterials(EMaterialState State)
@@ -157,6 +187,10 @@ void ABuilding::BeginPlay()
 			if (MeshComponent->GetName().Contains("Muzzle", ESearchCase::IgnoreCase))
 			{
 				Muzzles.Add(MeshComponent);
+				LastMuzzleAnimationTime.Add(GetWorld()->GetTimeSeconds() - 10);
+
+				// Muzzles forward should be +x axis
+				MuzzleBaseRelativeXLocation.Add(MeshComponent->GetRelativeLocation().X);
 			}
 		}
 	}
@@ -380,6 +414,9 @@ void ABuilding::PlayFireAnimation()
 		true, // Make sure emitter loops are set to 1 in particle system
 		EPSCPoolMethod::AutoRelease,
 		true);
+
+	// Keep track of last time this specific muzzle fired for 'animation'
+	LastMuzzleAnimationTime[CurrentMuzzleIndex] = GetWorld()->GetTimeSeconds();
 	
 	// Cycle to next muzzle
 	CurrentMuzzleIndex = (CurrentMuzzleIndex + 1) % Muzzles.Num();
@@ -413,6 +450,9 @@ void ABuilding::Tick(float DeltaTime)
 
 	if (Rotates)
 		UpdateRotation(DeltaTime);
+
+	if (MuzzleAnimates)
+		UpdateMuzzles();
 }
 
 void ABuilding::DestroyBuilding()

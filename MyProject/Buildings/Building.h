@@ -76,6 +76,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
 	bool Rotates = true;
 
+	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
+	bool MuzzleAnimates = true;
 	
 	/** Runtime vars */
 
@@ -109,9 +111,16 @@ public:
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Muzzles;
+	
+	TArray<float> LastMuzzleAnimationTime;
+
+	TArray<float> MuzzleBaseRelativeXLocation;
 
 	UPROPERTY()
 	int CurrentMuzzleIndex = 0;
+
+	UPROPERTY(EditDefaultsOnly)
+	UCurveFloat* RecoilCurve;
 
 	UPROPERTY(EditAnywhere, Category = "Animation")
 	UParticleSystem* MuzzleFlashParticleSystem;
@@ -130,6 +139,9 @@ public:
 
 	UFUNCTION()
 	void UpdateRotation(float DeltaTime);
+
+	UFUNCTION()
+	void UpdateMuzzles();
 
 	/** Material */
 
