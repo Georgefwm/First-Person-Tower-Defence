@@ -78,6 +78,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
 	bool MuzzleAnimates = true;
+
 	
 	/** Runtime vars */
 
@@ -96,6 +97,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float MaxRotationSpeed = 2.0;
 
+	
 	/** Mesh */
 
 	UPROPERTY(EditDefaultsOnly)
@@ -107,13 +109,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* AnimatePitchMesh;
 
+	
 	/** Mesh 'Animation' */
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Muzzles;
-	
+
+	UPROPERTY()
 	TArray<float> LastMuzzleAnimationTime;
 
+	UPROPERTY()
 	TArray<float> MuzzleBaseRelativeXLocation;
 
 	UPROPERTY()
@@ -143,6 +148,7 @@ public:
 	UFUNCTION()
 	void UpdateMuzzles();
 
+	
 	/** Material */
 
 	UPROPERTY()
@@ -160,6 +166,7 @@ public:
 	UFUNCTION()
 	void ChangeAllMeshMaterials(EMaterialState State);
 
+	
 	/** Sounds */
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Sound")
@@ -177,6 +184,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	AEnemy* CurrentTarget = nullptr;
 
+	
 	/** UI properties */
 	
 	UPROPERTY()
