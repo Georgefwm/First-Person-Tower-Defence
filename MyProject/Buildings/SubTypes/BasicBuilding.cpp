@@ -2,10 +2,14 @@
 
 #include "BasicBuilding.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleEmitter.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ABasicBuilding::ABasicBuilding()
 {
+	SetRootComponent(MeshRoot);
+	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -14,7 +18,7 @@ ABasicBuilding::ABasicBuilding()
 	SetRootComponent(BaseModel);
 
 	// Import stats from building data table
-	SetupStats();
+	Super::SetupStats();
 	
 	SetRootComponent(BaseModel);
 }
@@ -66,7 +70,8 @@ void ABasicBuilding::Attack(float DeltaTime)
 		if (FireSound)
 			UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 0.2, 1, 0);
 		
-		// Spawn particles...
+		
+		PlayFireAnimation();
 		
 		CurrentTarget->LastDamageDealer = BuildingOwner;
 		CurrentTarget->DecrementHealth(AttackDamage);
