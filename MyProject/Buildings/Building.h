@@ -107,7 +107,8 @@ public:
 
 	// Mesh 'Animation'
 
-	
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> Muzzles;
 
 	UPROPERTY()
 	FRotator CurrentYawTarget = FRotator(0.0, 0.0, 0.0);
@@ -129,10 +130,10 @@ public:
 	UPROPERTY()
 	bool LastCheckedValidity = false;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Placement")
+	UPROPERTY()
 	UMaterialInterface* ValidPlacementMaterial;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Placement")
+	UPROPERTY()
 	UMaterialInterface* InvalidPlacementMaterial;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Material")
@@ -165,18 +166,19 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString GetDisplayName();
-
+	
 	UPROPERTY()
 	FString Description;
 
 	UFUNCTION(BlueprintCallable)
 	FString GetDescription();
-	
 
+	
 	// Decide how the building should target available enemies
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	ETargetPriority CurrentTargetPriority = ETargetPriority::TP_LowestDistance;
-	
+
+	// Dictates tick behaviour
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	EBuildingState CurrentBuildingState = EBuildingState::BS_Building;
 
@@ -185,14 +187,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
-	
-	UPROPERTY()
-	TArray<UMaterial*> OriginalMats;
 
 	// Returns the position that the building attacks from
 	UFUNCTION()
 	virtual FVector GetSearchPosition();
 
+	// Sets building state, handles collision profile and material changes based on state
 	UFUNCTION()
 	void SetBuildingState(EBuildingState State);
 
@@ -200,24 +200,31 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// Updates materials based on IsValidBuildingLocation function
 	UFUNCTION()
 	void UpdatePreview();
 
+	// Progress build state or exit if complete
 	UFUNCTION()
 	virtual void Build(float DeltaTime);
 
+	// Apply damage and modifiers to current target
 	UFUNCTION()
 	virtual void Attack(float DeltaTime);
 
+	// Calculates the difference in angle between perfect line to target and turrets current line to target
 	UFUNCTION()
 	double GetTargetBarrelAngleDifference();
 
+	// Checks if the turret has unobstructed line of sight to (potential) target
 	UFUNCTION()
 	bool HasLineOfSight(AEnemy* Target);
 
+	// Finds best eligible target
 	UFUNCTION()
 	virtual void CheckForNewTarget();
 
+	// Load stats from the building data table
 	UFUNCTION()
 	virtual void SetupStats();
 
@@ -225,14 +232,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Checks if current location is valid position 
 	UFUNCTION()
 	bool IsValidBuildingLocation();
 
+	// Used by BuildTool to move the building around (for finding a valid position)
 	void UpdatePlacementPosition(FVector Location, FRotator Rotation);
 
+	// Handles cleanup logic and then destroys itself
 	UFUNCTION()
 	void DestroyBuilding();
-	
+
+	// Used to set the building owner reference
 	UFUNCTION()
 	void SetBuildingOwner(APlayerCharacter* Builder);
 
