@@ -7,8 +7,10 @@
 
 #include "BuildingStats.h"
 #include "EngineUtils.h"
+#include "Engine/StaticMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyProject/Enemies/Enemy.h"
+#include "Particles/ParticleSystemComponent.h"
 
 
 // Sets default values
@@ -18,7 +20,7 @@ ABuilding::ABuilding()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	MeshRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SharedRoot"));
-	RootComponent = MeshRoot;
+	SetRootComponent(MeshRoot);
 
 	CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionComponent"));
 	CollisionComponent->SetupAttachment(MeshRoot);
@@ -73,21 +75,23 @@ void ABuilding::UpdateRotation(float DeltaTime)
 	else // Return to base animation if not attacking
 	{
 		FRotator BaseRotation = GetActorForwardVector().Rotation();
+
+		double const Time = GetGameTimeSinceCreation();
 		
-		BaseRotation.Yaw += static_cast<double>(FMath::Cos(GetGameTimeSinceCreation())) * 20;
+		BaseRotation.Add(0.0, FMath::Sin(Time) * 30, 0.0);
 		
 		SetYawTarget(BaseRotation.Yaw);
 		SetPitchTarget(BaseRotation.Pitch);
 	}
-	
-	// FRotator NewPitchRotation = FMath::RInterpTo(AnimatePitchMesh->GetComponentRotation(), CurrentPitchTarget, DeltaTime, MaxRotationSpeed);
-	
-	double const NewYawRotation = FMath::Clamp(CurrentYawTarget.Yaw - AnimateYawMesh->GetComponentRotation().Yaw,
-		-MaxRotationSpeed, MaxRotationSpeed);
-	
-	double const NewPitchRotation = FMath::Clamp(CurrentPitchTarget.Pitch - AnimatePitchMesh->GetComponentRotation().Pitch,
-		-MaxRotationSpeed, MaxRotationSpeed);
 
+	// Calculate the delta yaw rotation for this tick
+	double const NewYawRotation = FMath::Clamp((CurrentYawTarget - AnimateYawMesh->GetComponentRotation()).GetNormalized().Yaw,
+		-MaxRotationSpeed, MaxRotationSpeed);
+	
+	// Calculate the delta pitch rotation for this tick
+	double const NewPitchRotation = FMath::Clamp((CurrentPitchTarget - AnimatePitchMesh->GetComponentRotation()).GetNormalized().Pitch,
+		-MaxRotationSpeed/2, MaxRotationSpeed/2);
+	
 	AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
 	AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
 }
@@ -236,13 +240,13 @@ void ABuilding::Build(float DeltaTime)
 
 void ABuilding::Attack(float DeltaTime)
 {
+	
 }
 
 double ABuilding::GetTargetBarrelAngleDifference()
 {
 	FRotator CurrentRotation = AnimatePitchMesh->GetComponentRotation();
 	FRotator PerfectRotation = (CurrentTarget->GetActorLocation() - AnimatePitchMesh->GetComponentLocation()).Rotation();
-	//double const Deviation = FVector::DotProduct(, );
 	double const Diff = PerfectRotation.GetManhattanDistance(CurrentRotation);
 	
 	//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, FString::Printf(TEXT("Angle: %f"), Diff));
@@ -347,6 +351,38 @@ void ABuilding::SetupStats()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to read Building data table"));
 	}
+}
+
+void ABuilding::PlayFireAnimation()
+{
+	if (MuzzleFlashParticleSystem == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BUILDING: Muzzle effect not set"));
+		return;
+	}
+	
+	if (!Muzzles.IsValidIndex(CurrentMuzzleIndex))
+	{
+		UE_LOG(LogTemp, Error, TEXT("BUILDING: Muzzle index failure"));	
+		return;
+	}
+	
+	UStaticMeshComponent* CurrentMuzzle = Muzzles[CurrentMuzzleIndex];
+	UStaticMeshSocket const* MuzzleSocket = CurrentMuzzle->GetSocketByName(FName("ParticleSpawnPoint"));
+	
+	UParticleSystemComponent* ParticleSystem = UGameplayStatics::SpawnEmitterAttached(MuzzleFlashParticleSystem,
+		CurrentMuzzle,
+		FName("ParticleSpawnPoint"),
+		FVector::ZeroVector,
+		FRotator::ZeroRotator,
+		FVector::OneVector,
+		EAttachLocation::SnapToTargetIncludingScale,
+		true, // Make sure emitter loops are set to 1 in particle system
+		EPSCPoolMethod::AutoRelease,
+		true);
+	
+	// Cycle to next muzzle
+	CurrentMuzzleIndex = (CurrentMuzzleIndex + 1) % Muzzles.Num();
 }
 
 void ABuilding::SetBuildingOwner(APlayerCharacter* Builder)
