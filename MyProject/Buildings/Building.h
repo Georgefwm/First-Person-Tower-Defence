@@ -73,7 +73,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int Cost;
 	
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
 	bool Rotates = true;
 
 	
@@ -94,7 +94,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float MaxRotationSpeed = 2.0;
 
-	// Mesh
+	/** Mesh */
 
 	UPROPERTY(EditDefaultsOnly)
 	USceneComponent* MeshRoot;
@@ -105,10 +105,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* AnimatePitchMesh;
 
-	// Mesh 'Animation'
+	/** Mesh 'Animation' */
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Muzzles;
+
+	UPROPERTY()
+	int CurrentMuzzleIndex = 0;
+
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	UParticleSystem* MuzzleFlashParticleSystem;
 
 	UPROPERTY()
 	FRotator CurrentYawTarget = FRotator(0.0, 0.0, 0.0);
@@ -125,7 +131,7 @@ public:
 	UFUNCTION()
 	void UpdateRotation(float DeltaTime);
 
-	// Material
+	/** Material */
 
 	UPROPERTY()
 	bool LastCheckedValidity = false;
@@ -142,7 +148,7 @@ public:
 	UFUNCTION()
 	void ChangeAllMeshMaterials(EMaterialState State);
 
-	// Sound
+	/** Sounds */
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Sound")
 	USoundBase* FireSound;
@@ -159,7 +165,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	AEnemy* CurrentTarget = nullptr;
 
-	// UI
+	/** UI properties */
 	
 	UPROPERTY()
 	FString DisplayName;
@@ -227,6 +233,9 @@ protected:
 	// Load stats from the building data table
 	UFUNCTION()
 	virtual void SetupStats();
+
+	UFUNCTION()
+	virtual void PlayFireAnimation();
 
 public:
 	// Called every frame
