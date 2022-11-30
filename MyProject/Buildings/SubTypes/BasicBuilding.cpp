@@ -2,7 +2,6 @@
 
 #include "BasicBuilding.h"
 #include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleEmitter.h"
 #include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
