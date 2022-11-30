@@ -72,10 +72,6 @@ void ASniperBuilding::Attack(float DeltaTime)
 				return;
 		}
 		
-		if (FireSound)
-			UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 0.2, 1, 0);
-		
-		
 		PlayFireAnimation();
 		
 		CurrentTarget->LastDamageDealer = BuildingOwner;

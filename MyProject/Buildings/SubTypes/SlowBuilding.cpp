@@ -55,9 +55,6 @@ void ASlowBuilding::Attack(float DeltaTime)
 			SetBuildingState(EBuildingState::BS_Idle);
 			return;
 		}
-
-		if (FireSound)
-			UGameplayStatics::PlaySound2D(GetWorld(), FireSound, 0.2, 1, 0);
 		
 		// Spawn particles...
 		
