@@ -93,9 +93,13 @@ public:
 	UPROPERTY()
 	double MaxAttackAngleDeviation = 5.0;
 	
-	// Speed of rotation interpolation in degrees
+	// Max speed of rotation in degrees while having active target
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
-	float MaxRotationSpeed = 2.0;
+	float MaxActiveRotationSpeed = 2.0;
+
+	// Max speed of rotation in degrees without active target
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Properties")
+	float MaxInactiveRotationSpeed = 0.3;
 
 	
 	/** Mesh */
@@ -124,8 +128,16 @@ public:
 	UPROPERTY()
 	int CurrentMuzzleIndex = 0;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UCurveFloat* RecoilCurve;
+
+	// Max relative location offset
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	float RecoilIntensity = 25;
+
+	UPROPERTY()
+	// 1 or -1 depending on the forward axis of the barrel
+	int RecoilDirection = 1;
 
 	UPROPERTY(EditAnywhere, Category = "Animation")
 	UParticleSystem* MuzzleFlashParticleSystem;
