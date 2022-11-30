@@ -293,6 +293,9 @@ double ABuilding::GetTargetBarrelAngleDifference()
 
 bool ABuilding::HasLineOfSight(AEnemy* Target)
 {
+	if (!IsValid(Target))
+		return false;
+	
 	if (Target->IsDead)
 		return false;
 	
@@ -344,7 +347,7 @@ void ABuilding::CheckForNewTarget()
 		if (AEnemy* Enemy = Cast<AEnemy>(Actor))
 		{
 			if (!IsValid(Enemy))
-				return;
+				continue;
 
 			if (Enemy->IsDead)
 				continue;
@@ -395,6 +398,8 @@ void ABuilding::SetupStats()
 
 void ABuilding::PlayFireAnimation()
 {
+	
+	
 	if (MuzzleFlashParticleSystem == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BUILDING: Muzzle effect not set"));
@@ -409,6 +414,10 @@ void ABuilding::PlayFireAnimation()
 	
 	UStaticMeshComponent* CurrentMuzzle = Muzzles[CurrentMuzzleIndex];
 	UStaticMeshSocket const* MuzzleSocket = CurrentMuzzle->GetSocketByName(FName("ParticleSpawnPoint"));
+
+	if (FireSound)
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, CurrentMuzzle->GetComponentLocation(),
+			FRotator::ZeroRotator, 0.2, 1, 0);
 	
 	UParticleSystemComponent* ParticleSystem = UGameplayStatics::SpawnEmitterAttached(MuzzleFlashParticleSystem,
 		CurrentMuzzle,
