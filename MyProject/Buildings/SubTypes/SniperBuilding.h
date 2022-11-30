@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "MyProject/Buildings/Building.h"
-#include "UObject/Object.h"
 #include "SniperBuilding.generated.h"
 
 /**
