@@ -53,7 +53,7 @@ protected:
 	AActor* Target;
 	
 	// Gold earned by defeating the enemy
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Enemy base Properties")
 	int GoldValue;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Combat text")
