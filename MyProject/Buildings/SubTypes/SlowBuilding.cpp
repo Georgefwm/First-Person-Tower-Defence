@@ -13,7 +13,7 @@ ASlowBuilding::ASlowBuilding()
 	BuildingName = FString("SlowBuilding");
 
 	// Import stats from building data table
-	SetupStats();
+	Super::SetupStats();
 	
 	SetRootComponent(BaseModel);
 }
