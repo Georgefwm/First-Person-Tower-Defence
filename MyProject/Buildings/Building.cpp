@@ -38,10 +38,12 @@ ABuilding::ABuilding()
 	AnimatePitchMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	
 	ValidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("ValidPlacementMaterial"));
-	ValidPlacementMaterial = LoadObject<UMaterial>(nullptr, TEXT("Material'/Game/Buildings/GlobalMaterials/ValidPreviewMaterial'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> ValidMaterial(TEXT("Material'/Game/Buildings/GlobalMaterials/ValidPreviewMaterial'"));
+	ValidPlacementMaterial = ValidMaterial.Object;
 	
 	InvalidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("InvalidPlacementMaterial"));
-	ValidPlacementMaterial = LoadObject<UMaterial>(nullptr, TEXT("Material'/Game/Buildings/GlobalMaterials/InvalidPreviewMaterial'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> InValidMaterial(TEXT("Material'/Game/Buildings/GlobalMaterials/InvalidPreviewMaterial'"));
+	InvalidPlacementMaterial = InValidMaterial.Object;
 
 	// RecoilCurve = LoadObject<UCurveFloat>(nullptr, TEXT("CurveFloat'/Game/Buildings/Shared/BuildingRecoilCurve'"));
 	
@@ -65,6 +67,7 @@ void ABuilding::SetPitchTarget(float DesiredPitch)
 
 void ABuilding::UpdateRotation(float DeltaTime)
 {
+	float CurrentRotationSpeed = MaxInactiveRotationSpeed;
 	
 	if (CurrentBuildingState == EBuildingState::BS_Attacking) // Follow target if attacking
 	{
@@ -73,6 +76,8 @@ void ABuilding::UpdateRotation(float DeltaTime)
 		
 		FRotator const LookAtPitchRotation = (CurrentTarget->GetActorLocation() - AnimatePitchMesh->GetComponentLocation()).Rotation();
 		SetPitchTarget(LookAtPitchRotation.Pitch);
+
+		CurrentRotationSpeed = MaxActiveRotationSpeed;
 	}
 	else // Return to base animation if not attacking
 	{
@@ -88,11 +93,11 @@ void ABuilding::UpdateRotation(float DeltaTime)
 
 	// Calculate the delta yaw rotation for this tick
 	double const NewYawRotation = FMath::Clamp((CurrentYawTarget - AnimateYawMesh->GetComponentRotation()).GetNormalized().Yaw,
-		-MaxRotationSpeed, MaxRotationSpeed);
+		-CurrentRotationSpeed, CurrentRotationSpeed);
 	
 	// Calculate the delta pitch rotation for this tick
 	double const NewPitchRotation = FMath::Clamp((CurrentPitchTarget - AnimatePitchMesh->GetComponentRotation()).GetNormalized().Pitch,
-		-MaxRotationSpeed/2, MaxRotationSpeed/2);
+		-CurrentRotationSpeed/2, CurrentRotationSpeed/2);
 	
 	AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
 	AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
@@ -106,8 +111,6 @@ void ABuilding::UpdateMuzzles()
 		return;
 	}
 	
-	float const MaxOffset = 20;
-	
 	for (int MuzzleIndex = 0; MuzzleIndex < Muzzles.Num(); MuzzleIndex++)
 	{
 		// We can use since y and z axes are not changed, hopefully does not break later...
@@ -116,10 +119,10 @@ void ABuilding::UpdateMuzzles()
 		float DeltaAnimationTime = GetWorld()->GetTimeSeconds() - LastMuzzleAnimationTime[MuzzleIndex];
 
 		// Skip if it wont change anything
-		if (DeltaAnimationTime > 1.1)
+		if (DeltaAnimationTime > 2)
 			continue;
 		
-		FVector NewLocation = FVector(MuzzleBaseRelativeXLocation[MuzzleIndex] - (RecoilCurve->GetFloatValue(DeltaAnimationTime) * MaxOffset),
+		FVector NewLocation = FVector(MuzzleBaseRelativeXLocation[MuzzleIndex] - ((RecoilCurve->GetFloatValue(DeltaAnimationTime) * RecoilIntensity) * RecoilDirection),
 			CurrentLocation.Y, CurrentLocation.Z);
 		
 		Muzzles[MuzzleIndex]->SetRelativeLocation(NewLocation);
@@ -290,6 +293,9 @@ double ABuilding::GetTargetBarrelAngleDifference()
 
 bool ABuilding::HasLineOfSight(AEnemy* Target)
 {
+	if (Target->IsDead)
+		return false;
+	
 	FVector Location = this->GetSearchPosition();
 
 	FVector From = Location;
