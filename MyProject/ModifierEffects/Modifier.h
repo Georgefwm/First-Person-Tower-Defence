@@ -38,6 +38,9 @@ public:
 	UModiferComponent* OwningComponent;
 
 	UPROPERTY()
+	UTexture2D* Icon;
+
+	UPROPERTY()
 	float ModifierValue;
 
 	// Can the modifier stack
@@ -62,6 +65,9 @@ public:
 	// Returns description of modifier
 	UFUNCTION()
 	virtual FString GetDescription();
+
+	UFUNCTION(BlueprintCallable)
+	UTexture2D* GetIcon() { return Icon; }
 
 	/**
 	 * Applies the Modifier to the owning target

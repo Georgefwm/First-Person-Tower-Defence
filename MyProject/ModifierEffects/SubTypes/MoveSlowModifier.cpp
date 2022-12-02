@@ -25,6 +25,9 @@ void AMoveSlowModifier::Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent
 	// Remove the modifier if already active on the target
 	if(OwningComponent->IsModifierActive(StaticClass()))
 		OwningComponent->RemoveModifierByClass(StaticClass());
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> IconFinder(TEXT("Texture2D'/Game/Icons_Using/Snowflake/Snowflake256'"));
+	Icon = IconFinder.Object;
 	
 	Target->SetMoveSpeed(Target->GetBaseMoveSpeed() * ModifierValue);
 
