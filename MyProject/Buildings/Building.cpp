@@ -44,8 +44,6 @@ ABuilding::ABuilding()
 	InvalidPlacementMaterial = CreateDefaultSubobject<UMaterial>(TEXT("InvalidPlacementMaterial"));
 	static ConstructorHelpers::FObjectFinder<UMaterial> InValidMaterial(TEXT("Material'/Game/Buildings/GlobalMaterials/InvalidPreviewMaterial'"));
 	InvalidPlacementMaterial = InValidMaterial.Object;
-
-	// RecoilCurve = LoadObject<UCurveFloat>(nullptr, TEXT("CurveFloat'/Game/Buildings/Shared/BuildingRecoilCurve'"));
 	
 	TurretMaterial = CreateDefaultSubobject<UMaterial>(TEXT("TurretMaterial"));
 	
@@ -91,16 +89,23 @@ void ABuilding::UpdateRotation(float DeltaTime)
 		SetPitchTarget(BaseRotation.Pitch);
 	}
 
-	// Calculate the delta yaw rotation for this tick
-	double const NewYawRotation = FMath::Clamp((CurrentYawTarget - AnimateYawMesh->GetComponentRotation()).GetNormalized().Yaw,
-		-CurrentRotationSpeed, CurrentRotationSpeed);
+	if (YawRotation)
+	{
+		// Calculate the delta yaw rotation for this tick
+		double const NewYawRotation = FMath::Clamp((CurrentYawTarget - AnimateYawMesh->GetComponentRotation()).GetNormalized().Yaw,
+			-CurrentRotationSpeed, CurrentRotationSpeed);
+
+		AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
+	}
 	
-	// Calculate the delta pitch rotation for this tick
-	double const NewPitchRotation = FMath::Clamp((CurrentPitchTarget - AnimatePitchMesh->GetComponentRotation()).GetNormalized().Pitch,
-		-CurrentRotationSpeed/2, CurrentRotationSpeed/2);
-	
-	AnimateYawMesh->SetWorldRotation(AnimateYawMesh->GetComponentRotation() + FRotator(0.0, NewYawRotation, 0.0));
-	AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
+	if (PitchRotation)
+	{
+		// Calculate the delta pitch rotation for this tick
+		double const NewPitchRotation = FMath::Clamp((CurrentPitchTarget - AnimatePitchMesh->GetComponentRotation()).GetNormalized().Pitch,
+			-CurrentRotationSpeed / 2, CurrentRotationSpeed / 2);
+
+		AnimatePitchMesh->SetWorldRotation(AnimatePitchMesh->GetComponentRotation() + FRotator(NewPitchRotation, 0.0, 0.0));
+	}	
 }
 
 void ABuilding::UpdateMuzzles()
@@ -229,8 +234,8 @@ void ABuilding::UpdatePreview()
 	bool const PlacementValidity = IsValidBuildingLocation();
 	
 	// Prevents material update every tick when not needed
-	if (LastCheckedValidity == PlacementValidity)
-		return;
+	//if (LastCheckedValidity == PlacementValidity)
+		//return;
 	
 	if (PlacementValidity)
 	{
@@ -282,10 +287,19 @@ void ABuilding::Attack(float DeltaTime)
 
 double ABuilding::GetTargetBarrelAngleDifference()
 {
+	
 	FRotator CurrentRotation = AnimatePitchMesh->GetComponentRotation();
 	FRotator PerfectRotation = (CurrentTarget->GetActorLocation() - AnimatePitchMesh->GetComponentLocation()).Rotation();
-	double const Diff = PerfectRotation.GetManhattanDistance(CurrentRotation);
+
+	// If building doesn't pitch rotate then ignore the pitch in the calculation
+	if (!PitchRotation)
+	{
+		CurrentRotation.Pitch = 0.0;
+		PerfectRotation.Pitch = 0.0;
+	}
 	
+	double const Diff = PerfectRotation.GetManhattanDistance(CurrentRotation);
+
 	//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, FString::Printf(TEXT("Angle: %f"), Diff));
 	
 	return Diff;
@@ -398,8 +412,6 @@ void ABuilding::SetupStats()
 
 void ABuilding::PlayFireAnimation()
 {
-	
-	
 	if (MuzzleFlashParticleSystem == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BUILDING: Muzzle effect not set"));
@@ -463,7 +475,7 @@ void ABuilding::Tick(float DeltaTime)
 		default: return;
 	}
 
-	if (Rotates)
+	if (YawRotation || PitchRotation)
 		UpdateRotation(DeltaTime);
 
 	if (MuzzleAnimates)

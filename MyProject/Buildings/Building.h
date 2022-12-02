@@ -72,12 +72,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	int Cost;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
-	bool Rotates = true;
-
-	UPROPERTY(VisibleAnywhere, Category = "Building Properties")
-	bool MuzzleAnimates = true;
 
 	
 	/** Runtime vars */
@@ -115,6 +109,15 @@ public:
 
 	
 	/** Mesh 'Animation' */
+
+	UPROPERTY(VisibleAnywhere, Category = "Animation")
+	bool YawRotation = true;
+
+	UPROPERTY(VisibleAnywhere, Category = "Animation")
+	bool PitchRotation = true;
+
+	UPROPERTY(VisibleAnywhere, Category = "Animation")
+	bool MuzzleAnimates = true;
 
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> Muzzles;
