@@ -7,19 +7,14 @@
 // Sets default values
 ABasicBuilding::ABasicBuilding()
 {
-	SetRootComponent(MeshRoot);
-	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	BuildingName = FString("BasicBuilding");
-
-	SetRootComponent(BaseModel);
+	
 
 	// Import stats from building data table
 	Super::SetupStats();
-	
-	SetRootComponent(BaseModel);
 }
 
 FVector ABasicBuilding::GetSearchPosition()
@@ -59,12 +54,9 @@ void ABasicBuilding::Attack(float DeltaTime)
 			SetBuildingState(EBuildingState::BS_Idle);
 			return;
 		}
-
-		if (Rotates)
-		{
-			if(GetTargetBarrelAngleDifference() > MaxAttackAngleDeviation)
-				return;
-		}
+		
+		if(GetTargetBarrelAngleDifference() > MaxAttackAngleDeviation)
+			return;
 		
 		PlayFireAnimation();
 		

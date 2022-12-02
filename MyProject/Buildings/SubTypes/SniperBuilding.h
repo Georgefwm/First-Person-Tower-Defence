@@ -18,9 +18,6 @@ public:
 	// Sets default values for this actor's properties
 	ASniperBuilding();
 	
-	UPROPERTY(Category=Actor, EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* BaseModel;
-	
 	virtual FVector GetSearchPosition() override;
 
 protected:

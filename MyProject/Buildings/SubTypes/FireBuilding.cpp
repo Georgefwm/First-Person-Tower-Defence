@@ -13,9 +13,7 @@ AFireBuilding::AFireBuilding()
 	BuildingName = FString("FireBuilding");
 
 	// Import stats from building data table
-	SetupStats();
-	
-	SetRootComponent(BaseModel);
+	Super::SetupStats();
 }
 
 FVector AFireBuilding::GetSearchPosition()

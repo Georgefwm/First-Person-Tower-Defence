@@ -17,9 +17,6 @@ public:
 	// Sets default values for this actor's properties
 	AFireBuilding();
 	
-	UPROPERTY(Category=Actor, EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* BaseModel;
-	
 	virtual FVector GetSearchPosition() override;
 
 protected:
