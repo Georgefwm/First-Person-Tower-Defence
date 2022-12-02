@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../Building.h"
+#include "NiagaraComponent.h"
 #include "SlowBuilding.generated.h"
 
 /**
@@ -14,14 +15,15 @@ class MYPROJECT_API ASlowBuilding : public ABuilding
 {
 	GENERATED_BODY()
 
-	
-
 public:
 	// Sets default values for this actor's properties
 	ASlowBuilding();
-	
-	UPROPERTY(Category=Actor, EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* BaseModel;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation - Slow Building")
+	UNiagaraSystem* IceEffectNiagaraSystem;
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* HitBox;
 	
 	virtual FVector GetSearchPosition() override;
 

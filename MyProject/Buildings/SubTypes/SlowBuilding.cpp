@@ -2,6 +2,7 @@
 
 #include "SlowBuilding.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 #include "MyProject/ModifierEffects/SubTypes/MoveSlowModifier.h"
 
 // Sets default values
@@ -12,10 +13,20 @@ ASlowBuilding::ASlowBuilding()
 
 	BuildingName = FString("SlowBuilding");
 
+	MuzzleAnimates = false;
+	PitchRotation = false;
+
+	HitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
+	float const BoxLength = AttackRange * 2;
+	HitBox->SetAbsolute(false, false, true);
+	HitBox->InitBoxExtent(FVector(BoxLength, 80, 80));
+	HitBox->SetupAttachment(AnimateYawMesh);
+	HitBox->SetRelativeLocation(FVector(BoxLength / 2, 0, 40));
+	HitBox->SetWorldScale3D(FVector::OneVector);
+	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
 	// Import stats from building data table
 	Super::SetupStats();
-	
-	SetRootComponent(BaseModel);
 }
 
 FVector ASlowBuilding::GetSearchPosition()
@@ -56,11 +67,53 @@ void ASlowBuilding::Attack(float DeltaTime)
 			return;
 		}
 		
-		// Spawn particles...
+		if(GetTargetBarrelAngleDifference() > MaxAttackAngleDeviation)
+			return;
 		
-		CurrentTarget->LastDamageDealer = BuildingOwner;
-		CurrentTarget->DecrementHealth(AttackDamage);
-		CurrentTarget->GiveModifier(AMoveSlowModifier::StaticClass());
+		
+	
+		if (!Muzzles.IsValidIndex(CurrentMuzzleIndex))
+		{
+			UE_LOG(LogTemp, Error, TEXT("BUILDING: Muzzle index failure"));	
+			return;
+		}
+	
+		UStaticMeshComponent* CurrentMuzzle = Muzzles[CurrentMuzzleIndex];
+		UStaticMeshSocket const* MuzzleSocket = CurrentMuzzle->GetSocketByName(FName("ParticleSpawnPoint"));
+
+		if (FireSound)
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, CurrentMuzzle->GetComponentLocation(),
+				FRotator::ZeroRotator, 0.2, 1, 0);
+
+		
+		if (IceEffectNiagaraSystem)
+		{
+			FVector EffectSpawnLocation = CurrentMuzzle->GetComponentLocation();
+			EffectSpawnLocation.Z = 1.5;
+		
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), IceEffectNiagaraSystem,
+				EffectSpawnLocation,
+				CurrentMuzzle->GetComponentRotation(),
+				FVector::OneVector,
+				true,
+				true,
+				ENCPoolMethod::AutoRelease,
+				true);
+		}
+		
+		TArray<AActor*> OverlappingActors;
+
+		HitBox->GetOverlappingActors(OverlappingActors, AEnemy::StaticClass());
+
+		for (AActor* Actor : OverlappingActors)
+		{
+			if (AEnemy* Enemy = Cast<AEnemy>(Actor))
+			{
+				CurrentTarget->LastDamageDealer = BuildingOwner;
+				CurrentTarget->DecrementHealth(AttackDamage);
+				CurrentTarget->GiveModifier(AMoveSlowModifier::StaticClass());
+			}
+		}
 		
 		LastAttackTime = GetWorld()->GetTimeSeconds();
 	}
