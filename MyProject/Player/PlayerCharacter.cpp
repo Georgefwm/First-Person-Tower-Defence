@@ -7,7 +7,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Engine/Engine.h"
 #include "Components/InputComponent.h"
 #include "MyProject/Equipables/Weapon.h"
 #include "GameFramework/InputSettings.h"
@@ -19,8 +18,6 @@
 
 APlayerCharacter::APlayerCharacter()
 {
-	
-	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 	
