@@ -7,9 +7,6 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameModeBase.h"
-#include "GameFramework/GameStateBase.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "MyProject/Core/TowerDefenceGameMode.h"
 #include "MyProject/Core/TowerDefenceGameState.h"
 #include "MyProject/ModifierEffects/ModiferComponent.h"
 #include "MyProject/ModifierEffects/SubTypes/MoveSlowModifier.h"
@@ -34,8 +31,6 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-
-	
 	
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
@@ -59,7 +54,7 @@ void AEnemy::HandleHit(FHitResult Hit, int Damage, APlayerCharacter* Shooter)
 	
 	
 	const FString BoneName = Hit.BoneName.ToString();
-	if (BoneName == FString("Bip001-Head"))
+	if (BoneName == FString("head"))
 	{
 		FinalDamage *= 2;
 
@@ -101,24 +96,20 @@ void AEnemy::SetMoveSpeed(float Speed)
 	this->GetCharacterMovement()->MaxWalkSpeed = Speed;
 }
 
-void AEnemy::GetModifiers(TArray<AModifier*> Mods)
+TArray<AModifier*> AEnemy::GetModifiers()
 {
-	TArray<AActor*> AttachedActors;
+	TArray<AModifier*> Mods;
 	
-	GetAttachedActors(AttachedActors);
-
-	for (AActor* Actor : AttachedActors)
+	if (IsValid(ModifierComponent))
 	{
-		if (AModifier* Modifer = Cast<AModifier>(Actor))
-		{
-			Mods.Add(Modifer);
-		}
+		ModifierComponent->GetModifiers(Mods);
 	}
+
+	return Mods;
 }
 
 void AEnemy::GiveModifier(UClass* ModClass)
 {
-	
 	ModifierComponent->ApplyModifier(ModClass);
 }
 

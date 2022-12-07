@@ -112,8 +112,8 @@ public:
 	void SetMoveSpeed(float Speed);
 
 	// Returns a list of modifiers currently effecting this Enemy
-	UFUNCTION()
-	void GetModifiers(TArray<AModifier*> Mods);
+	UFUNCTION(BlueprintCallable)
+	TArray<AModifier*> GetModifiers();
 
 	// Gives this enemy a modifier
 	UFUNCTION()
