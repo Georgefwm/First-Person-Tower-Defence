@@ -27,9 +27,6 @@ void ABurnModifier::Apply(AEnemy* Enemy, UModiferComponent* ModiferComponent)
 	if(OwningComponent->IsModifierActive(StaticClass()))
 		OwningComponent->RemoveModifierByClass(StaticClass());
 	
-	static ConstructorHelpers::FObjectFinder<UTexture2D> IconFinder(TEXT("Texture2D'/Game/Icons_Using/FireIcon/Fire256'"));
-	Icon = IconFinder.Object;
-	
 	// Set burn repeating timer
 	GetWorldTimerManager().SetTimer(Timer, this, &ABurnModifier::BurnTarget, TickRate,
 		true,TickRate);
