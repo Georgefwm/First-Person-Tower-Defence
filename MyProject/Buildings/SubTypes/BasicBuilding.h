@@ -11,8 +11,6 @@ class MYPROJECT_API ABasicBuilding : public ABuilding
 {
 	GENERATED_BODY()
 
-	
-
 public:
 	// Sets default values for this actor's properties
 	ABasicBuilding();
