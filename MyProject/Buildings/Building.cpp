@@ -222,9 +222,9 @@ bool ABuilding::IsValidBuildingLocation()
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 
-	// Get all Enemies in sphere radius
+
 	UKismetSystemLibrary::BoxOverlapActors(GetWorld(), CollisionComponent->GetComponentLocation(),
-		CollisionComponent->GetUnscaledBoxExtent(), ObjectTypes, nullptr, ActorsToIgnore, Actors);
+		CollisionComponent->GetScaledBoxExtent(), ObjectTypes, nullptr, ActorsToIgnore, Actors);
 	
 	return Actors.IsEmpty();
 }
