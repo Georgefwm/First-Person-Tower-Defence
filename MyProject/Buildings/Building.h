@@ -80,7 +80,7 @@ public:
 	UPROPERTY()
 	APlayerCharacter* BuildingOwner;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* CollisionComponent;
 
 	// Maximum angle deviation allowed to attack enemy
