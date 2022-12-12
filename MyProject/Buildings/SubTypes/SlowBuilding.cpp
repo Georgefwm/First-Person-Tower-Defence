@@ -15,15 +15,17 @@ ASlowBuilding::ASlowBuilding()
 
 	MuzzleAnimates = false;
 	PitchRotation = false;
-
+	
 	HitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
-	float const BoxLength = AttackRange * 2;
-	HitBox->SetAbsolute(false, false, true);
-	HitBox->InitBoxExtent(FVector(BoxLength, 80, 80));
-	HitBox->SetupAttachment(AnimateYawMesh);
-	HitBox->SetRelativeLocation(FVector(BoxLength / 2, 0, 40));
+	HitBox->InitBoxExtent(FVector(AttackRange, 80, 60));
+	HitBox->SetRelativeLocation(FVector(AttackRange / 2, 0, 60));
+	
+	HitBox->SetUsingAbsoluteScale(false);
 	HitBox->SetWorldScale3D(FVector::OneVector);
+	
+	HitBox->SetupAttachment(AnimateYawMesh);
 	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HitBox->SetVisibility(true, false);
 
 	// Import stats from building data table
 	Super::SetupStats();
@@ -44,6 +46,14 @@ void ASlowBuilding::BeginPlay()
 void ASlowBuilding::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// if (CurrentBuildingState != EBuildingState::BS_Placing)
+	// {
+	// 	DrawDebugLine(GetWorld(), AnimateYawMesh->GetComponentLocation(),
+	// 		AnimateYawMesh->GetComponentLocation() + AnimateYawMesh->GetForwardVector() * AttackRange, FColor(255, 0, 0), false, -1);
+	// 	DrawDebugBox(GetWorld(), AnimateYawMesh->GetComponentLocation() + AnimateYawMesh->GetForwardVector() * AttackRange,
+	// 		FVector(5, 5, 5), FColor::Emerald, false, -1);
+	// }
 }
 
 void ASlowBuilding::Build(float DeltaTime)

@@ -22,7 +22,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation - Slow Building")
 	UNiagaraSystem* IceEffectNiagaraSystem;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	UBoxComponent* HitBox;
 	
 	virtual FVector GetSearchPosition() override;
