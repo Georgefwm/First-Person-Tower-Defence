@@ -4,13 +4,9 @@
 #include "Building.h"
 
 #include "BuildingStats.h"
-#include "EngineUtils.h"
-#include "Animation/AnimSequenceHelpers.h"
-#include "Engine/StaticMeshSocket.h"
-#include "Engine/TimelineTemplate.h"
+#include "Comparators/SubTypes/ClosestPriority.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyProject/Enemies/Enemy.h"
-#include "Particles/ParticleSystemComponent.h"
 
 
 // Sets default values
@@ -185,6 +181,8 @@ void ABuilding::BeginPlay()
 	Super::BeginPlay();
 
 	SearchPosition = GetActorLocation();
+
+	PrioritySystem = NewObject<UClosestPriority>();
 
 	LastAttackTime = GetWorld()->GetTimeSeconds() - 100;
 
@@ -362,28 +360,29 @@ void ABuilding::CheckForNewTarget()
 	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetSearchPosition(), AttackRange, ObjectTypes,
 		AEnemy::StaticClass(), ActorsToIgnore, Actors);
 
-	// Always try to attack the closet enemy
-	for (AActor* Actor : Actors)
-	{
-		// Might be redundant check
-		if (AEnemy* Enemy = Cast<AEnemy>(Actor))
-		{
-			if (!IsValid(Enemy))
-				continue;
-
-			if (Enemy->IsDead)
-				continue;
-
-			float Distance = FVector::Dist(GetSearchPosition(), Enemy->GetActorLocation());
-
-			if (Distance < ShortestDistance && HasLineOfSight(Enemy))
-			{
-				NextTarget = Enemy;
-				ShortestDistance = Distance;
-			}
-		}
-	}
-	CurrentTarget = NextTarget;
+	// // Always try to attack the closet enemy
+	// for (AActor* Actor : Actors)
+	// {
+	// 	// Might be redundant check
+	// 	if (AEnemy* Enemy = Cast<AEnemy>(Actor))
+	// 	{
+	// 		if (!IsValid(Enemy))
+	// 			continue;
+	//
+	// 		if (Enemy->IsDead)
+	// 			continue;
+	//
+	// 		float Distance = FVector::Dist(GetSearchPosition(), Enemy->GetActorLocation());
+	//
+	// 		if (Distance < ShortestDistance && HasLineOfSight(Enemy))
+	// 		{
+	// 			NextTarget = Enemy;
+	// 			ShortestDistance = Distance;
+	// 		}
+	// 	}
+	// }
+	
+	CurrentTarget = PrioritySystem->Compare(this, Actors);
 
 	// Set Building state
 	if (CurrentTarget != nullptr)

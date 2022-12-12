@@ -8,6 +8,7 @@
 #include "MyProject/Enemies/Enemy.h"
 #include "Building.generated.h"
 
+class UPrioritySystem;
 class UDataTable;
 
 UENUM()
@@ -215,10 +216,16 @@ public:
 	FString GetDescription();
 
 	
+	/** Targeting/Priority */
+
 	// Decide how the building should target available enemies
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	ETargetPriority CurrentTargetPriority = ETargetPriority::TP_LowestDistance;
+	
+	UPROPERTY()
+	UPrioritySystem* PrioritySystem;
 
+	
 	// Dictates tick behaviour
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building Properties")
 	EBuildingState CurrentBuildingState = EBuildingState::BS_Building;
