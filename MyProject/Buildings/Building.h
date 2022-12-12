@@ -229,6 +229,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Building Properties")
 	float LastAttackTime;
 
+	UPROPERTY()
+	FVector SearchPosition = FVector::ZeroVector;
+
 	// Returns the position that the building attacks from
 	UFUNCTION()
 	virtual FVector GetSearchPosition();

@@ -143,6 +143,9 @@ void ABuilding::ChangeAllMeshMaterials(EMaterialState State)
 	{
 		if (UStaticMeshComponent* MeshComponent = StaticCast<UStaticMeshComponent*>(Component))
 		{
+			if (MeshComponent->GetName().Contains(TEXT("Sphere"), ESearchCase::IgnoreCase))
+				continue;
+			
 			// TODO: Clean up. there must be a cleaner way to do this
 			switch (State)
 			{
@@ -173,13 +176,15 @@ FString ABuilding::GetDescription()
 
 FVector ABuilding::GetSearchPosition()
 {
-	return FVector(0.0, 0.0, 0.0);
+	return SearchPosition;
 }
 
 // Called when the game starts or when spawned
 void ABuilding::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SearchPosition = GetActorLocation();
 
 	LastAttackTime = GetWorld()->GetTimeSeconds() - 100;
 
@@ -194,6 +199,9 @@ void ABuilding::BeginPlay()
 
 			if (MeshComponent->GetName().Contains("Muzzle", ESearchCase::IgnoreCase))
 			{
+				if (Muzzles.IsEmpty())
+					SearchPosition.Z = MeshComponent->GetComponentLocation().Z;
+				
 				Muzzles.Add(MeshComponent);
 				LastMuzzleAnimationTime.Add(GetWorld()->GetTimeSeconds() - 10);
 
@@ -313,7 +321,7 @@ bool ABuilding::HasLineOfSight(AEnemy* Target)
 	if (Target->IsDead)
 		return false;
 	
-	FVector Location = this->GetSearchPosition();
+	FVector Location = GetSearchPosition();
 
 	FVector From = Location;
 	FVector To = Target->GetActorLocation();
