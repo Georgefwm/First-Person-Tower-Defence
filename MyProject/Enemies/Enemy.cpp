@@ -3,10 +3,8 @@
 
 #include "Enemy.h"
 
-#include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/GameModeBase.h"
 #include "MyProject/Core/TowerDefenceGameState.h"
 #include "MyProject/ModifierEffects/ModiferComponent.h"
 #include "MyProject/ModifierEffects/SubTypes/MoveSlowModifier.h"
