@@ -4,13 +4,9 @@
 #include "BuildTool.h"
 
 #include "VectorUtil.h"
-#include "AI/NavigationSystemBase.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
-#include "Camera/CameraActor.h"
-#include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "MyProject/Buildings/BuildingStats.h"
 
 
 // Sets default values
@@ -197,38 +193,40 @@ void ABuildTool::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (CurrentlyPlacing)
-	{
-		if (BuildingBeingPlaced == nullptr)
-			return;
+	if (!CurrentlyPlacing)
+		return;
+	
+	if (BuildingBeingPlaced == nullptr)
+		return;
 
-		FVector Location = GetBuildLocation();
-		FRotator Rotation = GetBuildRotation();
-		
-		BuildingBeingPlaced->UpdatePlacementPosition(Location, Rotation);
-	}
+	FVector Location = GetBuildLocation();
+	FRotator Rotation = GetBuildRotation();
+	
+	BuildingBeingPlaced->UpdatePlacementPosition(Location, Rotation);
+	
 }
 
 void ABuildTool::PrimaryFirePressed()
 {
-	if (CurrentlyPlacing)
-	{
-		if (BuildingBeingPlaced == nullptr)
-			return;
+	if (!CurrentlyPlacing)
+		return;
+	
+	if (BuildingBeingPlaced == nullptr)
+		return;
 
-		if (BuildingBeingPlaced->BuildingOwner->GetCurrentGold() < BuildingBeingPlaced->Cost)
-		{
-			return;
-		}
-		
-		if (BuildingBeingPlaced->IsValidBuildingLocation())
-		{
-			CurrentlyPlacing = false;
-			BuildingBeingPlaced->BuildingOwner->DecrementGold(BuildingBeingPlaced->Cost);
-			BuildingBeingPlaced->SetBuildingState(EBuildingState::BS_Building);
-			BuildingBeingPlaced = nullptr;
-		}
+	if (BuildingBeingPlaced->BuildingOwner->GetCurrentGold() < BuildingBeingPlaced->Cost)
+	{
+		return;
 	}
+	
+	if (BuildingBeingPlaced->IsValidBuildingLocation())
+	{
+		CurrentlyPlacing = false;
+		BuildingBeingPlaced->BuildingOwner->DecrementGold(BuildingBeingPlaced->Cost);
+		BuildingBeingPlaced->SetBuildingState(EBuildingState::BS_Building);
+		BuildingBeingPlaced = nullptr;
+	}
+	
 }
 
 // Adds a rotation offset to the build location
@@ -241,10 +239,25 @@ void ABuildTool::SecondaryFirePressed()
 void ABuildTool::Reload()
 {
 	if (MenuOpen)
+	{
 		CloseBuildMenu();
-	else
-		OpenBuildMenu();
+		return;
+	}
 	
+	if (CurrentlyPlacing)
+	{
+		BuildRotationOffset = 0;
+		
+		if (BuildingBeingPlaced)
+		{
+			BuildingBeingPlaced->DestroyBuilding();
+			BuildingBeingPlaced = nullptr;
+		}
+		
+		CurrentlyPlacing = false;
+	}
+
+	OpenBuildMenu();
 }
 
 void ABuildTool::OnEquip()
