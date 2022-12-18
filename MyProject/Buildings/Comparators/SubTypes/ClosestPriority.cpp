@@ -27,7 +27,7 @@ AEnemy* UClosestPriority::Compare(ABuilding *Asker, TArray<AActor*> &Candidates)
 
 			float Distance = FVector::Dist(Asker->GetSearchPosition(), Enemy->GetActorLocation());
 
-			if (Distance < ShortestDistance)
+			if (Distance < ShortestDistance && Asker->HasLineOfSight(Enemy))
 			{
 				BestTarget = Enemy;
 				ShortestDistance = Distance;

@@ -27,7 +27,7 @@ AEnemy* UHealthPriority::Compare(ABuilding *Asker, TArray<AActor*> &Candidates)
 
 			int CandidateHealth = Enemy->GetHP();
 
-			if (CandidateHealth > HighestHealth)
+			if (CandidateHealth > HighestHealth && Asker->HasLineOfSight(Enemy))
 			{
 				BestTarget = Enemy;
 				HighestHealth = CandidateHealth;

@@ -247,6 +247,10 @@ public:
 	UFUNCTION()
 	void SetBuildingState(EBuildingState State);
 
+	// Checks if the turret has unobstructed line of sight to (potential) target
+	UFUNCTION()
+	bool HasLineOfSight(AEnemy* Target);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -267,9 +271,7 @@ protected:
 	UFUNCTION()
 	double GetTargetBarrelAngleDifference();
 
-	// Checks if the turret has unobstructed line of sight to (potential) target
-	UFUNCTION()
-	bool HasLineOfSight(AEnemy* Target);
+	
 
 	// Finds best eligible target
 	UFUNCTION()
