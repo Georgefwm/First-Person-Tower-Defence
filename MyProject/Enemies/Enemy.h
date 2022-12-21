@@ -6,7 +6,7 @@
 #include <GameFramework/Character.h>
 
 #include "CoreMinimal.h"
-#include "MyProject/HeadshotText.h"
+#include "MyProject/UI/HeadshotText.h"
 #include "MyProject/Player/PlayerCharacter.h"
 #include "Enemy.generated.h"
 
