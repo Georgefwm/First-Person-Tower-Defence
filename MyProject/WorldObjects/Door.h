@@ -26,7 +26,7 @@ public:
 
 	// Can maybe turn this into curve?
 	UPROPERTY(EditAnywhere, Category = "Door Properties")
-	float OpenSpeed = 10.0;
+	float OpenSpeed = 120.0;
 
 	UPROPERTY(EditAnywhere, Category = "Door Properties")
 	UCurveFloat* OpenCurve;
@@ -42,6 +42,9 @@ public:
 
 	UFUNCTION()
 	float GetOpenPercentage();
+
+	UFUNCTION()
+	void SetLocked(bool NewLockStatus);
 
 protected:
 	// Called when the game starts or when spawned

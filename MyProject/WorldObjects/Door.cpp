@@ -84,6 +84,22 @@ float ADoor::GetOpenPercentage()
 	return DoorRight->GetRelativeLocation().X / MaxOpenOffset;
 }
 
+void ADoor::SetLocked(bool NewLockStatus)
+{
+	if (NewLockStatus)
+	{
+		DoorLeft->SetCollisionResponseToAllChannels(ECR_Block);
+		DoorRight->SetCollisionResponseToAllChannels(ECR_Block);
+	}
+	else
+	{
+		DoorLeft->SetCollisionResponseToAllChannels(ECR_Ignore);
+		DoorRight->SetCollisionResponseToAllChannels(ECR_Ignore);
+	}
+	
+	Locked = NewLockStatus;
+}
+
 // Called when the game starts or when spawned
 void ADoor::BeginPlay()
 {
@@ -93,6 +109,8 @@ void ADoor::BeginPlay()
 		OriginalDoorOffset = 0.0;
 	else
 		UE_LOG(LogTemp, Warning, TEXT("DOOR: Door not found"));
+
+	SetLocked(false);
 }
 
 // Called every frame
@@ -116,7 +134,10 @@ void ADoor::Tick(float DeltaTime)
 	// Update if we need to
 	if (ShouldUpdateThisTick())
 	{
-		UpdateDoorPosition(DeltaTime);
+		if (!Locked)
+		{
+			UpdateDoorPosition(DeltaTime);
+		}
 	}
 }
 
