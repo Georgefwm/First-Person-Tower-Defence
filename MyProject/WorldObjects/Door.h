@@ -22,11 +22,11 @@ public:
 	bool ShouldBeOpen = false;
 
 	UPROPERTY(EditAnywhere, Category = "Door Properties")
-	float MaxOpenOffset = 120.0;
+	float MaxOpenOffset = 110.0;
 
 	// Can maybe turn this into curve?
 	UPROPERTY(EditAnywhere, Category = "Door Properties")
-	float OpenSpeed = 120.0;
+	float OpenSpeed = 225.0;
 
 	UPROPERTY(EditAnywhere, Category = "Door Properties")
 	UCurveFloat* OpenCurve;
