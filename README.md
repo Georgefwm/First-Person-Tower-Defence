@@ -1,7 +1,5 @@
 ## A first person tower defence game
 
-A personal project to practice c++ and Unreal Engine. <br>
+A personal project to practice c++ and Unreal Engine.
 
-Only consists of source code (not about to pay an arm for asset storage)<br>
-
-Codebase is pretty messy atm... still learning
+Only consists of my naive source code.
